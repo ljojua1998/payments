@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useMemo } from "react";
-import { Search } from "lucide-react";
+import { Search, Sigma } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { formatGel } from "@/lib/format";
 import { useCompanies } from "@/lib/hooks/use-dashboard-data";
 import { useTransactionAction } from "@/lib/hooks/use-dashboard-mutations";
 import type { BankTransaction, Company } from "@/lib/types";
@@ -88,6 +89,19 @@ export function TransactionsSection({
 
   const pagination = usePagination(visibleTransactions);
   const { setPage } = pagination;
+
+  const isFiltered =
+    filters.status !== "all" ||
+    searchInput.trim() !== "" ||
+    filters.day !== undefined;
+  const filteredTotal = useMemo(
+    () =>
+      visibleTransactions.reduce(
+        (sum, transaction) => sum + Number(transaction.amount),
+        0,
+      ),
+    [visibleTransactions],
+  );
 
   useEffect(() => {
     setPage(1);
@@ -195,6 +209,18 @@ export function TransactionsSection({
                 runAction({ type: "restore", transaction })
               }
             />
+            {isFiltered && visibleTransactions.length > 0 && (
+              <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 rounded-lg border border-primary/25 bg-primary/5 px-3 py-2 text-[13px]">
+                <span className="inline-flex items-center gap-1.5 text-muted-foreground">
+                  <Sigma size={14} className="text-primary" />
+                  გაფილტრულია {visibleTransactions.length} ტრანზაქცია
+                </span>
+                <span className="tabular-nums">
+                  ჯამი:{" "}
+                  <b className="text-foreground">{formatGel(filteredTotal)}</b>
+                </span>
+              </div>
+            )}
             <PaginationControls
               page={pagination.page}
               pageCount={pagination.pageCount}
