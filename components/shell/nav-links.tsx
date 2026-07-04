@@ -64,12 +64,21 @@ export function BottomNav() {
               href={item.href}
               aria-current={isActive ? "page" : undefined}
               className={cn(
-                "flex flex-col items-center gap-1 py-2.5 text-xs font-medium transition-colors",
+                "relative flex min-w-0 flex-col items-center gap-1 px-0.5 py-2 text-[10px] font-medium transition-colors",
                 isActive ? "text-primary" : "text-muted-foreground",
               )}
             >
-              <item.icon size={20} strokeWidth={isActive ? 2.2 : 2} />
-              {item.label}
+              {isActive && (
+                <span className="absolute inset-x-3 top-0 h-0.5 rounded-full bg-primary" />
+              )}
+              <item.icon
+                size={19}
+                strokeWidth={isActive ? 2.2 : 2}
+                className="shrink-0"
+              />
+              <span className="w-full truncate text-center leading-none">
+                {item.label}
+              </span>
             </Link>
           );
         })}

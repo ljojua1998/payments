@@ -18,6 +18,10 @@ export function SuggestionChip({ transaction, onAssign }: SuggestionChipProps) {
   const suggestions = useCompanySuggestions(transaction, true);
   const top = suggestions.data?.[0];
 
+  if (suggestions.isPending) {
+    return <span className="block h-6 w-28 animate-pulse rounded-full bg-muted" />;
+  }
+
   if (!top) {
     return <span className="text-muted-foreground">—</span>;
   }
