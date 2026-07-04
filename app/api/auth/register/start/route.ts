@@ -37,7 +37,10 @@ export async function POST(request: Request) {
     request.headers.get("host"),
   );
   if (!result.ok) {
-    return NextResponse.json({ error: result.error }, { status: result.status });
+    return NextResponse.json(
+      { error: result.error, code: result.reason },
+      { status: result.status },
+    );
   }
 
   return NextResponse.json({ ok: true });

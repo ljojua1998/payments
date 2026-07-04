@@ -43,10 +43,10 @@ export function ForgotPasswordForm() {
     setErrors({});
     setIsLoading(true);
 
-    const { error } = await startPasswordReset(parsed.data.phone);
+    const { error, code } = await startPasswordReset(parsed.data.phone);
     setIsLoading(false);
 
-    if (error) {
+    if (error && code !== "cooldown") {
       setAuthError(error);
       return;
     }

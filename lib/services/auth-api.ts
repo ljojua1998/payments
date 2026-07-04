@@ -1,4 +1,4 @@
-type ApiResult = { error: string | null };
+type ApiResult = { error: string | null; code?: string };
 
 async function postJson(url: string, payload: unknown): Promise<ApiResult> {
   try {
@@ -12,8 +12,12 @@ async function postJson(url: string, payload: unknown): Promise<ApiResult> {
     }
     const body = (await response.json().catch(() => null)) as {
       error?: string;
+      code?: string;
     } | null;
-    return { error: body?.error ?? "მოთხოვნა ვერ შესრულდა — სცადეთ თავიდან" };
+    return {
+      error: body?.error ?? "მოთხოვნა ვერ შესრულდა — სცადეთ თავიდან",
+      code: body?.code,
+    };
   } catch {
     return { error: "კავშირი ვერ დამყარდა — შეამოწმეთ ინტერნეტი" };
   }

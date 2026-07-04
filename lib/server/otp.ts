@@ -9,7 +9,9 @@ const MAX_VERIFY_ATTEMPTS = 5;
 
 export type OtpPurpose = "register" | "reset";
 
-type OtpResult = { ok: true } | { ok: false; error: string; status: number };
+type OtpResult =
+  | { ok: true }
+  | { ok: false; error: string; status: number; reason?: "cooldown" };
 
 function hashCode(phone: string, code: string): string {
   return createHash("sha256").update(`${phone}:${code}`).digest("hex");
@@ -51,6 +53,7 @@ export async function issueOtp(
       ok: false,
       error: "კოდი უკვე გაიგზავნა — დაელოდეთ და სცადეთ ხელახლა",
       status: 429,
+      reason: "cooldown",
     };
   }
 

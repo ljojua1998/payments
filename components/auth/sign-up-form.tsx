@@ -43,10 +43,10 @@ export function SignUpForm() {
     setErrors({});
     setIsLoading(true);
 
-    const { error } = await startRegistration(parsed.data.phone);
+    const { error, code } = await startRegistration(parsed.data.phone);
     setIsLoading(false);
 
-    if (error) {
+    if (error && code !== "cooldown") {
       setAuthError(error);
       return;
     }
