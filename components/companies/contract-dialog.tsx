@@ -42,7 +42,7 @@ export function ContractDialog({ company, open, onClose }: ContractDialogProps) 
     }
     setErrors({});
     createContract.mutate(
-      { companyId: company.id, input: parsed.data },
+      { companyId: company.id, companyName: company.name, input: parsed.data },
       {
         onSuccess: () => {
           setMonthlyAmount("");

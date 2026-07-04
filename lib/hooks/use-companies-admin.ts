@@ -13,6 +13,7 @@ import {
 } from "@/lib/services/companies";
 import { getMatchedPayments } from "@/lib/services/matched-payments";
 import { runInnMatching } from "@/lib/services/matching";
+import { logActivity } from "@/lib/services/activity";
 import type { ContractStatus } from "@/lib/types";
 import type { CompanyInput, ContractInput } from "@/lib/schemas/data-entry";
 
@@ -43,7 +44,13 @@ export function useCreateCompany() {
   return useMutation({
     mutationFn: async (input: CompanyInput) => {
       await createCompany(supabase, input);
-      return runInnMatching(supabase);
+      const matched = await runInnMatching(supabase);
+      await logActivity(
+        supabase,
+        "company_created",
+        `დაამატა კომპანია „${input.name}" (ს/კ ${input.taxId})${matched > 0 ? ` — ავტომატურად მიება ${matched} გადარიცხვა` : ""}`,
+      );
+      return matched;
     },
     onSuccess: invalidate,
   });
@@ -63,7 +70,14 @@ export function useDeleteCompany() {
   const invalidate = useInvalidateReconciliation();
 
   return useMutation({
-    mutationFn: (companyId: string) => deleteCompany(supabase, companyId),
+    mutationFn: async (variables: { id: string; name: string }) => {
+      await deleteCompany(supabase, variables.id);
+      await logActivity(
+        supabase,
+        "company_deleted",
+        `წაშალა კომპანია „${variables.name}"`,
+      );
+    },
     onSuccess: () => {
       invalidate();
       queryClient.invalidateQueries({ queryKey: ["payments", "matched"] });
@@ -76,8 +90,18 @@ export function useCreateContract() {
   const invalidate = useInvalidateReconciliation();
 
   return useMutation({
-    mutationFn: (variables: { companyId: string; input: ContractInput }) =>
-      createContract(supabase, variables.companyId, variables.input),
+    mutationFn: async (variables: {
+      companyId: string;
+      companyName: string;
+      input: ContractInput;
+    }) => {
+      await createContract(supabase, variables.companyId, variables.input);
+      await logActivity(
+        supabase,
+        "contract_created",
+        `დაამატა ხელშეკრულება: „${variables.companyName}" — ${variables.input.monthlyAmount}₾/თვე`,
+      );
+    },
     onSuccess: invalidate,
   });
 }
@@ -87,17 +111,24 @@ export function useUpdateContractStatus() {
   const invalidate = useInvalidateReconciliation();
 
   return useMutation({
-    mutationFn: (variables: {
+    mutationFn: async (variables: {
       contractId: string;
       status: ContractStatus;
       endDate: string | null;
-    }) =>
-      updateContractStatus(
+      monthlyAmount: number;
+    }) => {
+      await updateContractStatus(
         supabase,
         variables.contractId,
         variables.status,
         variables.endDate,
-      ),
+      );
+      await logActivity(
+        supabase,
+        "contract_status_changed",
+        `${variables.status === "paused" ? "შეაჩერა" : "დაასრულა"} ხელშეკრულება (${variables.monthlyAmount}₾/თვე) — ${variables.endDate}`,
+      );
+    },
     onSuccess: invalidate,
   });
 }

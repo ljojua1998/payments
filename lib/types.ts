@@ -46,6 +46,25 @@ export interface CompanyMonthlySummary {
   actual_amount: number;
 }
 
+export interface Profile {
+  id: string;
+  full_name: string | null;
+  phone: string | null;
+  first_name: string | null;
+  last_name: string | null;
+  birth_date: string | null;
+  avatar_url: string | null;
+}
+
+export interface ActivityRecord {
+  id: string;
+  user_id: string | null;
+  user_name: string;
+  action: string;
+  details: string;
+  created_at: string;
+}
+
 export interface CompanySuggestion {
   company_id: string;
   company_name: string;

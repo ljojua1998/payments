@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { resetVerifySchema } from "@/lib/schemas/auth-api";
-import { toE164 } from "@/lib/auth/phone";
+import { toAuthEmail, toE164 } from "@/lib/auth/phone";
 import { createAdminClient } from "@/lib/server/admin";
 import { verifyOtp } from "@/lib/server/otp";
 
@@ -14,7 +14,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const { phone, code, password } = parsed.data;
+  const { phone, code } = parsed.data;
   const admin = createAdminClient();
 
   const { data: profile } = await admin
@@ -38,17 +38,18 @@ export async function POST(request: Request) {
     );
   }
 
-  const { error: updateError } = await admin.auth.admin.updateUserById(
-    profile.id,
-    { password },
-  );
+  const { data: link, error: linkError } =
+    await admin.auth.admin.generateLink({
+      type: "magiclink",
+      email: toAuthEmail(phone),
+    });
 
-  if (updateError) {
+  if (linkError || !link.properties?.hashed_token) {
     return NextResponse.json(
-      { error: "პაროლის განახლება ვერ მოხერხდა — სცადეთ თავიდან" },
+      { error: "შესვლა ვერ მოხერხდა — სცადეთ თავიდან" },
       { status: 500 },
     );
   }
 
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ tokenHash: link.properties.hashed_token });
 }

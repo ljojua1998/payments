@@ -5,6 +5,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/lib/supabase/client";
 import { queryKeys } from "@/lib/queries/keys";
 import { runInnMatching } from "@/lib/services/matching";
+import { logActivity } from "@/lib/services/activity";
 import {
   assignCompanyToTransaction,
   ignoreTransaction,
@@ -19,12 +20,37 @@ export function useRunMatching() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: () => runInnMatching(supabase),
+    mutationFn: async () => {
+      const matched = await runInnMatching(supabase);
+      if (matched > 0) {
+        await logActivity(
+          supabase,
+          "matching_run",
+          `გაუშვა ავტო-მატჩინგი — დაემთხვა ${matched} ტრანზაქცია`,
+        );
+      }
+      return matched;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeys.allTransactions });
       queryClient.invalidateQueries({ queryKey: queryKeys.allSummaries });
     },
   });
+}
+
+function actionDetails(action: TransactionAction): string {
+  const t = action.transaction;
+  const label = `${Number(t.amount)}₾ (${t.sender_name ?? "უცნობი"}, ${t.entry_date})`;
+  switch (action.type) {
+    case "assign":
+      return `მიაბა ტრანზაქცია ${label} კომპანიას „${action.company.name}"`;
+    case "unmatch":
+      return `მოხსნა მიბმა ტრანზაქციას ${label}`;
+    case "ignore":
+      return `იგნორში გადაიტანა ტრანზაქცია ${label}`;
+    case "restore":
+      return `აღადგინა ტრანზაქცია ${label}`;
+  }
 }
 
 type TransactionAction =
@@ -72,25 +98,34 @@ export function useTransactionAction(month: MonthKey) {
   const transactionsKey = queryKeys.transactions(month);
 
   return useMutation({
-    mutationFn: (action: TransactionAction) => {
+    mutationFn: async (action: TransactionAction) => {
       switch (action.type) {
         case "assign":
-          return assignCompanyToTransaction(
+          await assignCompanyToTransaction(
             supabase,
             action.transaction.id,
             action.company.id,
           );
+          break;
         case "unmatch":
-          return unmatchTransaction(supabase, action.transaction.id);
+          await unmatchTransaction(supabase, action.transaction.id);
+          break;
         case "ignore":
-          return ignoreTransaction(supabase, action.transaction.id);
+          await ignoreTransaction(supabase, action.transaction.id);
+          break;
         case "restore":
-          return restoreTransaction(
+          await restoreTransaction(
             supabase,
             action.transaction.id,
             Boolean(action.transaction.matched_company_id),
           );
+          break;
       }
+      await logActivity(
+        supabase,
+        `transaction_${action.type}`,
+        actionDetails(action),
+      );
     },
     onMutate: async (action) => {
       await queryClient.cancelQueries({ queryKey: transactionsKey });

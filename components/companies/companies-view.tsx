@@ -171,9 +171,10 @@ export function CompaniesView() {
 
   const handleDeleteConfirm = () => {
     if (!deleteTarget) return;
-    deleteCompany.mutate(deleteTarget.id, {
-      onSuccess: () => setDeleteTarget(null),
-    });
+    deleteCompany.mutate(
+      { id: deleteTarget.id, name: deleteTarget.name },
+      { onSuccess: () => setDeleteTarget(null) },
+    );
   };
 
   return (

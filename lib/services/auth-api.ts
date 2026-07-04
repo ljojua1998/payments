@@ -1,4 +1,4 @@
-type ApiResult = { error: string | null; code?: string };
+type ApiResult = { error: string | null; code?: string; tokenHash?: string };
 
 async function postJson(url: string, payload: unknown): Promise<ApiResult> {
   try {
@@ -7,13 +7,14 @@ async function postJson(url: string, payload: unknown): Promise<ApiResult> {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
     });
-    if (response.ok) {
-      return { error: null };
-    }
     const body = (await response.json().catch(() => null)) as {
       error?: string;
       code?: string;
+      tokenHash?: string;
     } | null;
+    if (response.ok) {
+      return { error: null, tokenHash: body?.tokenHash };
+    }
     return {
       error: body?.error ?? "მოთხოვნა ვერ შესრულდა — სცადეთ თავიდან",
       code: body?.code,
@@ -43,7 +44,6 @@ export function startPasswordReset(phone: string): Promise<ApiResult> {
 export function verifyPasswordReset(input: {
   phone: string;
   code: string;
-  password: string;
 }): Promise<ApiResult> {
   return postJson("/api/auth/reset/verify", input);
 }

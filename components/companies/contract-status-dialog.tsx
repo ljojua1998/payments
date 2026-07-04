@@ -47,7 +47,12 @@ export function ContractStatusDialog({
     event.preventDefault();
     if (!endDate) return;
     updateStatus.mutate(
-      { contractId: contract.id, status: action, endDate },
+      {
+        contractId: contract.id,
+        status: action,
+        endDate,
+        monthlyAmount: Number(contract.monthly_amount),
+      },
       { onSuccess: onClose },
     );
   };

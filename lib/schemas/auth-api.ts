@@ -15,7 +15,6 @@ export const registerVerifySchema = z.object({
 export const resetVerifySchema = z.object({
   phone: phoneSchema,
   code: otpCodeSchema,
-  password: passwordSchema,
 });
 
 export type OtpStartInput = z.infer<typeof otpStartSchema>;
