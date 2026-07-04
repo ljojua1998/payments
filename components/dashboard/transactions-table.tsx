@@ -166,9 +166,20 @@ export function TransactionsTable({
             {transactions.map((transaction) => (
               <tr
                 key={transaction.id}
-                className="border-b border-border/60 last:border-0 hover:bg-muted/40"
+                className={cn(
+                  "border-b border-border/60 last:border-0 hover:bg-muted/40",
+                  transaction.status === "unmatched" &&
+                    "bg-destructive/[0.04] hover:bg-destructive/[0.07]",
+                  transaction.status === "ignored" && "opacity-60",
+                )}
               >
-                <td className="whitespace-nowrap py-3 pr-4 tabular-nums text-muted-foreground">
+                <td
+                  className={cn(
+                    "whitespace-nowrap border-l-[3px] border-l-transparent py-3 pl-2 pr-4 tabular-nums text-muted-foreground",
+                    transaction.status === "unmatched" &&
+                      "border-l-destructive",
+                  )}
+                >
                   {formatDate(transaction.entry_date)}
                 </td>
                 <td className="max-w-0 py-3 pr-4">
@@ -197,7 +208,12 @@ export function TransactionsTable({
         {transactions.map((transaction) => (
           <li
             key={transaction.id}
-            className="rounded-lg border border-border bg-card p-4"
+            className={cn(
+              "rounded-lg border border-border bg-card p-4",
+              transaction.status === "unmatched" &&
+                "border-destructive/40 bg-destructive/[0.04]",
+              transaction.status === "ignored" && "opacity-60",
+            )}
           >
             <div className="flex items-start justify-between gap-2">
               <SenderCell transaction={transaction} />

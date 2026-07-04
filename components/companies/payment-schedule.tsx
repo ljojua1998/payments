@@ -43,6 +43,22 @@ const STATUS_CONFIG: Record<
   },
 };
 
+const STATUS_FRAME: Record<ScheduleStatus, string> = {
+  paid: "border-success/25",
+  partial: "border-warning/45 bg-warning/[0.06]",
+  upcoming: "border-border",
+  due: "border-warning/50 bg-warning/[0.07]",
+  overdue: "border-destructive/45 bg-destructive/[0.05]",
+};
+
+const STATUS_DAYBOX: Record<ScheduleStatus, string> = {
+  paid: "bg-success/10 text-success",
+  partial: "bg-warning/10 text-warning",
+  upcoming: "bg-primary/10 text-primary",
+  due: "bg-warning/10 text-warning",
+  overdue: "bg-destructive/10 text-destructive",
+};
+
 export function PaymentSchedule() {
   const companiesQuery = useCompaniesWithContracts();
   const paymentsQuery = useMatchedPayments();
@@ -108,16 +124,24 @@ export function PaymentSchedule() {
           </p>
         ) : (
           <>
-            <ul className="divide-y divide-border/70">
+            <ul className="flex flex-col gap-2">
               {pagination.pageItems.map((row) => {
                 const status = STATUS_CONFIG[row.status];
                 return (
                   <li
                     key={row.companyId}
-                    className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5 py-3"
+                    className={cn(
+                      "flex flex-wrap items-center justify-between gap-x-4 gap-y-1.5 rounded-lg border px-3 py-2.5",
+                      STATUS_FRAME[row.status],
+                    )}
                   >
                     <div className="flex min-w-0 items-center gap-3">
-                      <span className="flex h-9 w-9 shrink-0 flex-col items-center justify-center rounded-lg bg-primary/10 leading-none text-primary">
+                      <span
+                        className={cn(
+                          "flex h-9 w-9 shrink-0 flex-col items-center justify-center rounded-lg leading-none",
+                          STATUS_DAYBOX[row.status],
+                        )}
+                      >
                         <span className="text-sm font-bold tabular-nums">
                           {row.payDay}
                         </span>

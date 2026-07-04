@@ -10,6 +10,7 @@ import {
   Unlink,
   XCircle,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { useCompanySuggestions } from "@/lib/hooks/use-company-suggestions";
 import { Button } from "@/components/ui/button";
 import {
@@ -53,8 +54,12 @@ export function TransactionActions({
         <Button
           variant="ghost"
           size="icon"
-          className="h-8 w-8"
           aria-label="მოქმედებები"
+          className={cn(
+            "h-8 w-8",
+            transaction.status === "unmatched" &&
+              "border border-destructive/40 text-destructive hover:bg-destructive/10 hover:text-destructive",
+          )}
         >
           <MoreHorizontal size={16} />
         </Button>

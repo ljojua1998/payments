@@ -28,6 +28,12 @@ const TONE_BAR: Record<RowTone, string> = {
   muted: "bg-muted-foreground/40",
 };
 
+const TONE_FRAME: Record<RowTone, string> = {
+  success: "border-success/25",
+  destructive: "border-destructive/45 bg-destructive/[0.05]",
+  muted: "border-dashed border-muted-foreground/40 bg-muted/40",
+};
+
 function fillRatio(row: CompanyMonthlySummary): number {
   if (row.expected_amount === 0) return row.actual_amount > 0 ? 1 : 0;
   return Math.min(row.actual_amount / row.expected_amount, 1);
@@ -115,12 +121,18 @@ export function ExpectedVsActual({
             ამ თვეში მონაცემები არ არის
           </p>
         ) : (
-          <ul className="flex flex-col divide-y divide-border/70">
+          <ul className="flex flex-col gap-2">
             {pagination.pageItems.map((row) => {
               const tone = rowTone(row);
               const difference = row.actual_amount - row.expected_amount;
               return (
-                <li key={row.company_id} className="py-2.5">
+                <li
+                  key={row.company_id}
+                  className={cn(
+                    "rounded-lg border px-3 py-2.5",
+                    TONE_FRAME[tone],
+                  )}
+                >
                   <div className="flex items-baseline justify-between gap-3">
                     <p
                       className="min-w-0 truncate text-sm font-medium"
