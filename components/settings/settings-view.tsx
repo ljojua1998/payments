@@ -264,7 +264,7 @@ function PasswordCard() {
 
 export function SettingsView() {
   return (
-    <div className="flex flex-col gap-5">
+    <div className="mx-auto flex w-full max-w-2xl flex-col gap-5">
       <div>
         <h1 className="text-xl font-semibold tracking-tight">პარამეტრები</h1>
         <p className="text-sm text-muted-foreground">

@@ -43,11 +43,11 @@ async function getYearlyStats(
 
   const rows = (data ?? []) as StatRow[];
   const byMonthKey = new Map<string, MonthBar>();
-  const years = new Set<number>([currentYear]);
+  const dataYears: number[] = [];
 
   for (const row of rows) {
     const key = row.entry_date.slice(0, 7);
-    years.add(Number(row.entry_date.slice(0, 4)));
+    dataYears.push(Number(row.entry_date.slice(0, 4)));
 
     const bar = byMonthKey.get(key) ?? emptyBar(Number(row.entry_date.slice(5, 7)));
     if (row.status === "matched") {
@@ -65,10 +65,15 @@ async function getYearlyStats(
     bar.matchRate = relevant > 0 ? bar.matchedCount / relevant : null;
   }
 
-  return {
-    availableYears: [...years].sort((a, b) => b - a),
-    byMonthKey,
-  };
+  // ყოველთვის ვთავაზობთ მიმდინარეს + წინა 2 წელს (მინიმუმ), პლუს
+  // ნებისმიერ წელს, რომელსაც მონაცემი აქვს — რომ წლების გადართვა ჩანდეს.
+  const minYear = Math.min(currentYear - 2, ...dataYears);
+  const availableYears: number[] = [];
+  for (let year = currentYear; year >= minYear; year -= 1) {
+    availableYears.push(year);
+  }
+
+  return { availableYears, byMonthKey };
 }
 
 export function useYearlyStats(currentYear: number) {
