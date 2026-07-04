@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Wand2 } from "lucide-react";
 import { useDashboardFilters } from "@/lib/hooks/use-dashboard-filters";
 import {
@@ -14,11 +14,33 @@ import { StatsBar, computeMonthStats } from "@/components/dashboard/stats-bar";
 import { TransactionsSection } from "@/components/dashboard/transactions-section";
 import { ExpectedVsActual } from "@/components/dashboard/expected-vs-actual";
 
+const SEARCH_DEBOUNCE_MS = 300;
+
 export function Dashboard() {
   const { filters, setFilters } = useDashboardFilters();
   const transactionsQuery = useTransactions(filters.month);
   const summaryQuery = useMonthlySummary(filters.month);
   const matching = useRunMatching();
+
+  const [searchInput, setSearchInput] = useState(filters.q);
+  const lastPushedQuery = useRef(filters.q);
+
+  useEffect(() => {
+    if (filters.q !== lastPushedQuery.current) {
+      lastPushedQuery.current = filters.q;
+      setSearchInput(filters.q);
+    }
+  }, [filters.q]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (searchInput !== filters.q) {
+        lastPushedQuery.current = searchInput;
+        setFilters({ q: searchInput });
+      }
+    }, SEARCH_DEBOUNCE_MS);
+    return () => clearTimeout(timer);
+  }, [searchInput, filters.q, setFilters]);
 
   const periodTransactions = useMemo(() => {
     const monthRows = transactionsQuery.data ?? [];
@@ -32,6 +54,17 @@ export function Dashboard() {
     () => computeMonthStats(periodTransactions),
     [periodTransactions],
   );
+
+  const visibleSummary = useMemo(() => {
+    const rows = summaryQuery.data ?? [];
+    const query = searchInput.trim().toLowerCase();
+    if (!query) return rows;
+    return rows.filter(
+      (row) =>
+        row.company_name.toLowerCase().includes(query) ||
+        row.tax_id.includes(query),
+    );
+  }, [summaryQuery.data, searchInput]);
 
   const { isSuccess: matchingDone, reset: resetMatching } = matching;
   useEffect(() => {
@@ -88,6 +121,8 @@ export function Dashboard() {
           transactions={periodTransactions}
           filters={filters}
           setFilters={setFilters}
+          searchInput={searchInput}
+          onSearchChange={setSearchInput}
           isLoading={transactionsQuery.isPending}
           error={
             transactionsQuery.isError ? transactionsQuery.error.message : null
@@ -96,7 +131,7 @@ export function Dashboard() {
         />
 
         <ExpectedVsActual
-          rows={summaryQuery.data ?? []}
+          rows={visibleSummary}
           month={filters.month}
           isLoading={summaryQuery.isPending}
           error={summaryQuery.isError ? summaryQuery.error.message : null}

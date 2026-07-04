@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo } from "react";
 import { Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCompanies } from "@/lib/hooks/use-dashboard-data";
@@ -16,8 +16,6 @@ import { Button } from "@/components/ui/button";
 import { PaginationControls } from "@/components/ui/pagination";
 import { usePagination } from "@/lib/hooks/use-pagination";
 import { TransactionsTable } from "@/components/dashboard/transactions-table";
-
-const SEARCH_DEBOUNCE_MS = 300;
 
 const STATUS_TABS: Array<{ value: StatusFilter; label: string }> = [
   { value: "all", label: "ყველა" },
@@ -56,6 +54,8 @@ type TransactionsSectionProps = {
   transactions: BankTransaction[];
   filters: DashboardFilters;
   setFilters: (updates: Partial<DashboardFilters>) => void;
+  searchInput: string;
+  onSearchChange: (value: string) => void;
   isLoading: boolean;
   error: string | null;
   onRetry: () => void;
@@ -65,31 +65,14 @@ export function TransactionsSection({
   transactions,
   filters,
   setFilters,
+  searchInput,
+  onSearchChange,
   isLoading,
   error,
   onRetry,
 }: TransactionsSectionProps) {
   const companiesQuery = useCompanies();
   const transactionAction = useTransactionAction(filters.month);
-  const [searchInput, setSearchInput] = useState(filters.q);
-  const lastPushedQuery = useRef(filters.q);
-
-  useEffect(() => {
-    if (filters.q !== lastPushedQuery.current) {
-      lastPushedQuery.current = filters.q;
-      setSearchInput(filters.q);
-    }
-  }, [filters.q]);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (searchInput !== filters.q) {
-        lastPushedQuery.current = searchInput;
-        setFilters({ q: searchInput });
-      }
-    }, SEARCH_DEBOUNCE_MS);
-    return () => clearTimeout(timer);
-  }, [searchInput, filters.q, setFilters]);
 
   const visibleTransactions = useMemo(
     () =>
@@ -147,7 +130,7 @@ export function TransactionsSection({
             <input
               type="search"
               value={searchInput}
-              onChange={(event) => setSearchInput(event.target.value)}
+              onChange={(event) => onSearchChange(event.target.value)}
               placeholder="ძებნა: სახელი ან ს/კ"
               aria-label="ძებნა გამგზავნის სახელით ან საიდენტიფიკაციო კოდით"
               className="h-9 w-full rounded-md border border-input bg-background pl-9 pr-3 text-base outline-none transition-colors placeholder:text-muted-foreground/60 focus:ring-2 focus:ring-ring sm:text-sm"

@@ -130,7 +130,7 @@ export function ExpectedVsActual({
           </div>
         ) : rows.length === 0 ? (
           <p className="py-10 text-center text-sm text-muted-foreground">
-            ამ თვეში მონაცემები არ არის
+            ჩანაწერები ვერ მოიძებნა
           </p>
         ) : (
           <ul className="flex flex-col gap-2">
