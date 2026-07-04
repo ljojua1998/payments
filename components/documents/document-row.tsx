@@ -12,6 +12,7 @@ import {
 } from "@/lib/hooks/use-documents";
 import type { DocumentRecord, DocumentStatus } from "@/lib/types";
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 const STATUS_CONFIG: Record<
   DocumentStatus,
@@ -45,18 +46,13 @@ export function DocumentRow({ document }: { document: DocumentRecord }) {
   const analyze = useAnalyzeDocument();
   const remove = useDeleteDocument();
   const [expanded, setExpanded] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const status = STATUS_CONFIG[document.status];
   const isAnalyzing = document.status === "analyzing" || analyze.isPending;
 
   const handleDownload = async () => {
     const url = await getDocumentDownloadUrl(supabase, document);
     window.open(url, "_blank", "noopener");
-  };
-
-  const handleDelete = () => {
-    if (window.confirm(`წაიშალოს „${document.name}"?`)) {
-      remove.mutate(document);
-    }
   };
 
   return (
@@ -124,8 +120,10 @@ export function DocumentRow({ document }: { document: DocumentRecord }) {
             variant="ghost"
             className="h-8 w-8 text-muted-foreground hover:text-destructive"
             aria-label="წაშლა"
-            disabled={remove.isPending}
-            onClick={handleDelete}
+            onClick={() => {
+              remove.reset();
+              setConfirmOpen(true);
+            }}
           >
             <Trash2 size={15} />
           </Button>
@@ -141,6 +139,19 @@ export function DocumentRow({ document }: { document: DocumentRecord }) {
           {document.summary}
         </div>
       )}
+
+      <ConfirmDialog
+        open={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        title={`წაიშალოს „${document.name}"?`}
+        description="ფაილი და მისი AI შეჯამება სამუდამოდ წაიშლება."
+        confirmLabel="წაშლა"
+        isPending={remove.isPending}
+        error={remove.isError ? remove.error.message : null}
+        onConfirm={() =>
+          remove.mutate(document, { onSuccess: () => setConfirmOpen(false) })
+        }
+      />
     </li>
   );
 }

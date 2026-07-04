@@ -13,6 +13,7 @@ import {
 import { usePagination } from "@/lib/hooks/use-pagination";
 import type { Company, CompanyWithContracts, Contract, ContractStatus } from "@/lib/types";
 import { Button } from "@/components/ui/button";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import { PaginationControls } from "@/components/ui/pagination";
 import { CompanyDialog } from "@/components/companies/company-dialog";
 import { ContractDialog } from "@/components/companies/contract-dialog";
@@ -118,6 +119,9 @@ export function CompaniesView() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [sortMode, setSortMode] = useState<SortMode>("payday");
   const [contractTarget, setContractTarget] = useState<Company | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<CompanyWithContracts | null>(
+    null,
+  );
   const [statusTarget, setStatusTarget] = useState<{
     contract: Contract;
     action: "paused" | "ended";
@@ -165,14 +169,11 @@ export function CompaniesView() {
 
   const pagination = usePagination(visibleCompanies);
 
-  const handleDelete = (company: CompanyWithContracts) => {
-    if (
-      window.confirm(
-        `წაიშალოს „${company.name}"?\n\nწაიშლება მისი ${company.contracts.length} ხელშეკრულებაც, მიბმული ტრანზაქციები კი შეუსაბამოში დაბრუნდება.`,
-      )
-    ) {
-      deleteCompany.mutate(company.id);
-    }
+  const handleDeleteConfirm = () => {
+    if (!deleteTarget) return;
+    deleteCompany.mutate(deleteTarget.id, {
+      onSuccess: () => setDeleteTarget(null),
+    });
   };
 
   return (
@@ -318,8 +319,10 @@ export function CompaniesView() {
                           variant="ghost"
                           className="h-8 w-8 text-muted-foreground hover:text-destructive"
                           aria-label={`${company.name} — წაშლა`}
-                          disabled={deleteCompany.isPending}
-                          onClick={() => handleDelete(company)}
+                          onClick={() => {
+                            deleteCompany.reset();
+                            setDeleteTarget(company);
+                          }}
                         >
                           <Trash2 size={15} />
                         </Button>
@@ -349,12 +352,6 @@ export function CompaniesView() {
             </ul>
           )}
 
-          {deleteCompany.isError && (
-            <p className="text-sm text-destructive">
-              {deleteCompany.error.message}
-            </p>
-          )}
-
           {companiesQuery.isSuccess && (
             <PaginationControls
               page={pagination.page}
@@ -379,6 +376,16 @@ export function CompaniesView() {
         contract={statusTarget?.contract ?? null}
         action={statusTarget?.action ?? null}
         onClose={() => setStatusTarget(null)}
+      />
+      <ConfirmDialog
+        open={Boolean(deleteTarget)}
+        onClose={() => setDeleteTarget(null)}
+        title={`წაიშალოს „${deleteTarget?.name}"?`}
+        description={`წაიშლება მისი ${deleteTarget?.contracts.length ?? 0} ხელშეკრულებაც, მიბმული ტრანზაქციები კი შეუსაბამოში დაბრუნდება. ეს მოქმედება შეუქცევადია.`}
+        confirmLabel="წაშლა"
+        isPending={deleteCompany.isPending}
+        error={deleteCompany.isError ? deleteCompany.error.message : null}
+        onConfirm={handleDeleteConfirm}
       />
     </div>
   );
