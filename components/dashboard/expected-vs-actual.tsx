@@ -118,7 +118,7 @@ export function ExpectedVsActual({
                 <p className="mb-2">
                   <b className="text-foreground">მოსალოდნელი</b> — ამ თვეში{" "}
                   <b className="text-foreground">აქტიური ხელშეკრულებების</b>{" "}
-                  ყოველთვიური თანხების ჯამი (იმართება „კომპანიების" გვერდზე).
+                  ყოველთვიური თანხების ჯამი (იმართება კომპანიების გვერდზე).
                 </p>
                 <p className="mb-2">
                   <b className="text-foreground">ფაქტობრივი</b> — ამ თვის{" "}
