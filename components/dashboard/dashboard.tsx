@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { Wand2 } from "lucide-react";
 import { useDashboardFilters } from "@/lib/hooks/use-dashboard-filters";
 import {
@@ -33,6 +33,13 @@ export function Dashboard() {
     [periodTransactions],
   );
 
+  const { isSuccess: matchingDone, reset: resetMatching } = matching;
+  useEffect(() => {
+    if (!matchingDone) return;
+    const timer = setTimeout(resetMatching, 6000);
+    return () => clearTimeout(timer);
+  }, [matchingDone, resetMatching]);
+
   return (
     <div className="flex flex-col gap-5">
       <div className="flex flex-wrap items-center justify-between gap-3">
@@ -43,11 +50,16 @@ export function Dashboard() {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2.5">
-          {matching.isSuccess && (
-            <span className="text-[13px] text-success">
-              დაემთხვა {matching.data} ტრანზაქცია
-            </span>
-          )}
+          {matching.isSuccess &&
+            (matching.data > 0 ? (
+              <span className="text-[13px] text-success">
+                დაემთხვა {matching.data} ახალი ტრანზაქცია
+              </span>
+            ) : (
+              <span className="text-[13px] text-muted-foreground">
+                ახალი დამთხვევა არ არის — ყველაფერი უკვე მიბმულია
+              </span>
+            ))}
           {matching.isError && (
             <span className="text-[13px] text-destructive">
               მატჩინგი ვერ შესრულდა

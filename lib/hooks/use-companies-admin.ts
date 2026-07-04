@@ -7,9 +7,11 @@ import { queryKeys } from "@/lib/queries/keys";
 import {
   createCompany,
   createContract,
+  deleteCompany,
   getCompaniesWithContracts,
   updateContractStatus,
 } from "@/lib/services/companies";
+import { getMatchedPayments } from "@/lib/services/matched-payments";
 import { runInnMatching } from "@/lib/services/matching";
 import type { ContractStatus } from "@/lib/types";
 import type { CompanyInput, ContractInput } from "@/lib/schemas/data-entry";
@@ -44,6 +46,28 @@ export function useCreateCompany() {
       return runInnMatching(supabase);
     },
     onSuccess: invalidate,
+  });
+}
+
+export function useMatchedPayments() {
+  const supabase = useMemo(() => createClient(), []);
+  return useQuery({
+    queryKey: ["payments", "matched"],
+    queryFn: () => getMatchedPayments(supabase),
+  });
+}
+
+export function useDeleteCompany() {
+  const supabase = useMemo(() => createClient(), []);
+  const queryClient = useQueryClient();
+  const invalidate = useInvalidateReconciliation();
+
+  return useMutation({
+    mutationFn: (companyId: string) => deleteCompany(supabase, companyId),
+    onSuccess: () => {
+      invalidate();
+      queryClient.invalidateQueries({ queryKey: ["payments", "matched"] });
+    },
   });
 }
 

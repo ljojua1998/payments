@@ -68,6 +68,34 @@ export async function createContract(
   }
 }
 
+export async function deleteCompany(
+  supabase: SupabaseClient,
+  companyId: string,
+): Promise<void> {
+  const { error: unmatchError } = await supabase
+    .from("bank_transactions")
+    .update({
+      matched_company_id: null,
+      match_method: null,
+      match_confidence: null,
+      status: "unmatched",
+    })
+    .eq("matched_company_id", companyId);
+
+  if (unmatchError) {
+    throw new Error(`ტრანზაქციების გათავისუფლება ვერ მოხერხდა: ${unmatchError.message}`);
+  }
+
+  const { error } = await supabase
+    .from("companies")
+    .delete()
+    .eq("id", companyId);
+
+  if (error) {
+    throw new Error(`კომპანიის წაშლა ვერ მოხერხდა: ${error.message}`);
+  }
+}
+
 export async function updateContractStatus(
   supabase: SupabaseClient,
   contractId: string,

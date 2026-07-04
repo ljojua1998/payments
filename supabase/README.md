@@ -14,6 +14,7 @@
 | 6 | `migrations/00006_phone_otps.sql` | `phone_otps` ცხრილი SMS კოდებისთვის და profiles ტრიგერის განახლება |
 | 7 | `migrations/00007_documents.sql` | `documents` ცხრილი, storage bucket და owner-only RLS პოლისები PDF დოკუმენტებისთვის |
 | 8 | `migrations/00008_data_entry_policies.sql` | ჩაწერის RLS პოლისები — კომპანიების/ხელშეკრულებების დამატება და ტრანზაქციების იმპორტი ავტორიზებული მომხმარებლისთვის |
+| 9 | `migrations/00009_delete_policies.sql` | წაშლის RLS პოლისები — კომპანიებისა და ხელშეკრულებების წაშლა ავტორიზებული მომხმარებლისთვის |
 
 > 00001-ის გაშვებისას თუ SQL Editor-მა RLS-ის დიალოგი გაჩვენათ, აირჩიეთ **Run without RLS** — RLS-ს მე-4 მიგრაცია რთავს policy-ებთან ერთად.
 
