@@ -133,6 +133,7 @@ export function Dashboard() {
         <ExpectedVsActual
           rows={visibleSummary}
           month={filters.month}
+          highlightActual={searchInput.trim() !== ""}
           isLoading={summaryQuery.isPending}
           error={summaryQuery.isError ? summaryQuery.error.message : null}
           onRetry={() => summaryQuery.refetch()}

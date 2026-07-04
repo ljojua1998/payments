@@ -79,6 +79,7 @@ type ExpectedVsActualProps = {
   isLoading: boolean;
   error: string | null;
   onRetry: () => void;
+  highlightActual?: boolean;
 };
 
 export function ExpectedVsActual({
@@ -87,6 +88,7 @@ export function ExpectedVsActual({
   isLoading,
   error,
   onRetry,
+  highlightActual = false,
 }: ExpectedVsActualProps) {
   const pagination = usePagination(rows);
 
@@ -179,9 +181,17 @@ export function ExpectedVsActual({
                   <div className="mt-1 flex items-center justify-between gap-3 text-xs tabular-nums">
                     <p className="text-muted-foreground">
                       ფაქტ.{" "}
-                      {row.actual_amount === 0
-                        ? "—"
-                        : formatGel(row.actual_amount)}
+                      <span
+                        className={cn(
+                          highlightActual &&
+                            row.actual_amount > 0 &&
+                            "rounded bg-primary/10 px-1 font-semibold text-primary",
+                        )}
+                      >
+                        {row.actual_amount === 0
+                          ? "—"
+                          : formatGel(row.actual_amount)}
+                      </span>
                       {" · "}მოსალ. {formatGel(row.expected_amount)}
                     </p>
                     <span className={cn("font-semibold", TONE_TEXT[tone])}>
