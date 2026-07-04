@@ -1,12 +1,17 @@
 "use client";
 
-import { Download } from "lucide-react";
+import { Download, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatGel, formatMonthLabel } from "@/lib/format";
 import type { CompanyMonthlySummary } from "@/lib/types";
 import type { MonthKey } from "@/lib/schemas/dashboard";
 import { Button } from "@/components/ui/button";
 import { PaginationControls } from "@/components/ui/pagination";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { TruncatedText } from "@/components/ui/tooltip";
 import { usePagination } from "@/lib/hooks/use-pagination";
 
@@ -96,7 +101,38 @@ export function ExpectedVsActual({
     <section className="flex flex-col rounded-xl border border-border bg-card">
       <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-3.5">
         <div className="min-w-0">
-          <h2 className="text-base font-semibold">მოსალოდნელი vs ფაქტობრივი</h2>
+          <div className="flex items-center gap-1.5">
+            <h2 className="text-base font-semibold">
+              მოსალოდნელი vs ფაქტობრივი
+            </h2>
+            <Popover>
+              <PopoverTrigger asChild>
+                <button
+                  aria-label="როგორ ითვლება"
+                  className="text-muted-foreground transition-colors hover:text-primary"
+                >
+                  <Info size={15} />
+                </button>
+              </PopoverTrigger>
+              <PopoverContent className="w-80 text-[13px] leading-relaxed">
+                <p className="mb-2">
+                  <b className="text-foreground">მოსალოდნელი</b> — ამ თვეში{" "}
+                  <b className="text-foreground">აქტიური ხელშეკრულებების</b>{" "}
+                  ყოველთვიური თანხების ჯამი (იმართება „კომპანიების" გვერდზე).
+                </p>
+                <p className="mb-2">
+                  <b className="text-foreground">ფაქტობრივი</b> — ამ თვის{" "}
+                  <b className="text-foreground">მიბმული</b> საბანკო
+                  გადარიცხვების ჯამი. მიუბმელი (შეუსაბამო) გადარიცხვა აქ არ
+                  ითვლება, სანამ ავტომატურად ან ხელით არ მიება კომპანიას.
+                </p>
+                <p className="text-muted-foreground">
+                  კომპანია სიაში ჩანს, თუ ამ თვეში ერთი მაინც ნულზე მეტია —
+                  მოსალოდნელი ან ფაქტობრივი.
+                </p>
+              </PopoverContent>
+            </Popover>
+          </div>
           <p className="truncate text-xs text-muted-foreground">
             {formatMonthLabel(month)} · აქტიური ხელშეკრულებები
           </p>
