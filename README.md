@@ -1,109 +1,84 @@
-<a href="https://demo-nextjs-with-supabase.vercel.app/">
-  <img alt="Next.js and Supabase Starter Kit - the fastest way to build apps with Next.js and Supabase" src="https://demo-nextjs-with-supabase.vercel.app/opengraph-image.png">
-  <h1 align="center">Next.js and Supabase Starter Kit</h1>
-</a>
+# ბალანსი — გადახდების შედარების დეშბორდი
 
-<p align="center">
- The fastest way to build apps with Next.js and Supabase
-</p>
+საბანკო ტრანზაქციების შედარება (reconciliation) მომსახურების ხელშეკრულებებთან: ტრანზაქციები ავტომატურად ემთხვევა კომპანიებს საიდენტიფიკაციო კოდით და ერთ ეკრანზე ჩანს ვინ გადაიხადა, ვინ დააკლო და ვინ საერთოდ არ გამოჩენილა.
 
-<p align="center">
-  <a href="#features"><strong>Features</strong></a> ·
-  <a href="#demo"><strong>Demo</strong></a> ·
-  <a href="#deploy-to-vercel"><strong>Deploy to Vercel</strong></a> ·
-  <a href="#clone-and-run-locally"><strong>Clone and run locally</strong></a> ·
-  <a href="#feedback-and-issues"><strong>Feedback and issues</strong></a>
-  <a href="#more-supabase-examples"><strong>More Examples</strong></a>
-</p>
-<br/>
+**Live demo:** _(Vercel ლინკი დაემატება)_
 
-## Features
+## ტექნოლოგიები
 
-- Works across the entire [Next.js](https://nextjs.org) stack
-  - App Router
-  - Pages Router
-  - Proxy
-  - Client
-  - Server
-  - It just works!
-- supabase-ssr. A package to configure Supabase Auth to use cookies
-- Password-based authentication block installed via the [Supabase UI Library](https://supabase.com/ui/docs/nextjs/password-based-auth)
-- Styling with [Tailwind CSS](https://tailwindcss.com)
-- Components with [shadcn/ui](https://ui.shadcn.com/)
-- Optional deployment with [Supabase Vercel Integration and Vercel deploy](#deploy-your-own)
-  - Environment variables automatically assigned to Vercel project
+Next.js (App Router) · TypeScript · Supabase (Database + Phone Auth) · Tailwind CSS · TanStack Query · Zod
 
-## Demo
+## გაშვება ლოკალურად
 
-You can view a fully working demo at [demo-nextjs-with-supabase.vercel.app](https://demo-nextjs-with-supabase.vercel.app/).
-
-## Deploy to Vercel
-
-Vercel deployment will guide you through creating a Supabase account and project.
-
-After installation of the Supabase integration, all relevant environment variables will be assigned to the project so the deployment is fully functioning.
-
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fnext.js%2Ftree%2Fcanary%2Fexamples%2Fwith-supabase&project-name=nextjs-with-supabase&repository-name=nextjs-with-supabase&demo-title=nextjs-with-supabase&demo-description=This+starter+configures+Supabase+Auth+to+use+cookies%2C+making+the+user%27s+session+available+throughout+the+entire+Next.js+app+-+Client+Components%2C+Server+Components%2C+Route+Handlers%2C+Server+Actions+and+Middleware.&demo-url=https%3A%2F%2Fdemo-nextjs-with-supabase.vercel.app%2F&external-id=https%3A%2F%2Fgithub.com%2Fvercel%2Fnext.js%2Ftree%2Fcanary%2Fexamples%2Fwith-supabase&demo-image=https%3A%2F%2Fdemo-nextjs-with-supabase.vercel.app%2Fopengraph-image.png)
-
-The above will also clone the Starter kit to your GitHub, you can clone that locally and develop locally.
-
-If you wish to just develop locally and not deploy to Vercel, [follow the steps below](#clone-and-run-locally).
-
-## Clone and run locally
-
-1. You'll first need a Supabase project which can be made [via the Supabase dashboard](https://database.new)
-
-2. Create a Next.js app using the Supabase Starter template npx command
+1. დააკლონირეთ რეპო და დააყენეთ დამოკიდებულებები:
 
    ```bash
-   npx create-next-app --example with-supabase with-supabase-app
+   npm install
    ```
 
-   ```bash
-   yarn create next-app --example with-supabase with-supabase-app
+2. შექმენით Supabase პროექტი და გაუშვით მიგრაციები SQL Editor-ში **თანმიმდევრობით** — დეტალური ინსტრუქცია: [`supabase/README.md`](./supabase/README.md)
+
+3. შექმენით `.env.local` ფაილი `.env.example`-ის მიხედვით:
+
+   ```
+   NEXT_PUBLIC_SUPABASE_URL=<project-url>
+   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<publishable-key>
    ```
 
-   ```bash
-   pnpm create next-app --example with-supabase with-supabase-app
-   ```
-
-3. Use `cd` to change into the app's directory
-
-   ```bash
-   cd with-supabase-app
-   ```
-
-4. Rename `.env.example` to `.env.local` and update the following:
-
-  ```env
-  NEXT_PUBLIC_SUPABASE_URL=[INSERT SUPABASE PROJECT URL]
-  NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=[INSERT SUPABASE PROJECT API PUBLISHABLE OR ANON KEY]
-  ```
-  > [!NOTE]
-  > This example uses `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, which refers to Supabase's new **publishable** key format.
-  > Both legacy **anon** keys and new **publishable** keys can be used with this variable name during the transition period. Supabase's dashboard may show `NEXT_PUBLIC_SUPABASE_ANON_KEY`; its value can be used in this example.
-  > See the [full announcement](https://github.com/orgs/supabase/discussions/29260) for more information.
-
-  Both `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` can be found in [your Supabase project's API settings](https://supabase.com/dashboard/project/_?showConnect=true)
-
-5. You can now run the Next.js local development server:
+4. გაუშვით:
 
    ```bash
    npm run dev
    ```
 
-   The starter kit should now be running on [localhost:3000](http://localhost:3000/).
+ავტორიზაცია ტელეფონის ნომრით მუშაობს — რეგისტრაციისთვის საჭიროა SMS პროვაიდერი ან სატესტო ნომრები (იხ. `supabase/README.md`).
 
-6. This template comes with the default shadcn/ui style initialized. If you instead want other ui.shadcn styles, delete `components.json` and [re-install shadcn/ui](https://ui.shadcn.com/docs/installation/next)
+## სად დევს matching logic და რატომ
 
-> Check out [the docs for Local Development](https://supabase.com/docs/guides/getting-started/local-development) to also run Supabase locally.
+მატჩინგი **მონაცემთა ბაზაშია** — Postgres ფუნქცია [`match_transactions_by_inn()`](./supabase/migrations/00005_matching_and_summary.sql), რომელიც კლიენტიდან Supabase RPC-ით გამოიძახება („ავტო-მატჩინგი" ღილაკი).
 
-## Feedback and issues
+```sql
+UPDATE bank_transactions bt
+SET matched_company_id = c.id, match_method = 'inn_exact',
+    match_confidence = 1.00, status = 'matched'
+FROM companies c
+WHERE bt.sender_inn = c.tax_id AND bt.status = 'unmatched';
+```
 
-Please file feedback and issues over on the [Supabase GitHub org](https://github.com/supabase/supabase/issues/new/choose).
+რატომ ბაზაში და არა client-side:
 
-## More Supabase examples
+- **ერთი set-based UPDATE** ერთი round-trip-ით — client-side ვარიანტი ყველა ტრანზაქციის წამოღებას და თითო-თითო განახლებას მოითხოვდა (N+1)
+- **ატომურობა** — ან ყველა დაემთხვევა, ან არცერთი; ორი მომხმარებლის პარალელური გაშვება race condition-ს არ ქმნის
+- **მასშტაბი** — 89 ტრანზაქციაზეც და 100 000-ზეც ერთნაირად მუშაობს, ინდექსით `sender_inn`-ზე
+- მატჩინგი მხოლოდ `status = 'unmatched'` რიგებს ეხება — ხელით მიბმული ან იგნორირებული ტრანზაქციები ხელუხლებელი რჩება
+- სახელის ვარიაციები პრობლემა არ არის: შედარება მხოლოდ ს/კ-ით ხდება („გეოტრანსი (ფილიალი)" იგივე ს/კ-ით ისევ „შპს გეოტრანსს" ემთხვევა)
 
-- [Next.js Subscription Payments Starter](https://github.com/vercel/nextjs-subscription-payments)
-- [Cookie-based Auth and the Next.js 13 App Router (free course)](https://youtube.com/playlist?list=PL5S4mPUpp4OtMhpnp93EFSo42iQ40XjbF)
-- [Supabase Auth and the Next.js App Router](https://github.com/supabase/supabase/tree/master/examples/auth/nextjs)
+„მოსალოდნელი vs ფაქტობრივი" შეჯამებაც ბაზაშია (`monthly_company_summary(month)`) — აგრეგაცია მონაცემებთან ახლოს კეთდება და კლიენტამდე მხოლოდ 15 რიგი მიდის.
+
+**ხელშეკრულება „აქტიურია არჩეულ თვეში"** თუ `start_date <= თვის ბოლო` და (`end_date IS NULL` ან `end_date >= თვის პირველი`). ასე სეიფ ტრანსპორტი (შეჩერდა 15 მაისს) მაისში ჯერ ითვლება, ივნისში — აღარ; ურბან მუვერსი (დასრულდა 30 აპრილს) მხოლოდ აპრილში ითვლება.
+
+## არქიტექტურა
+
+```
+lib/
+  schemas/      Zod სქემები — auth ფორმები, დეშბორდის ფილტრები (URL პარამეტრები)
+  services/     typed service layer — ყველა Supabase წვდომა აქ გადის
+  hooks/        TanStack Query hooks — queries, mutations, URL ფილტრები
+  queries/      query key factory
+components/
+  auth/         ტელეფონით რეგისტრაცია/შესვლა/აღდგენა SMS OTP-ით
+  dashboard/    სტატისტიკა, ტრანზაქციების ცხრილი, თვეების ნავიგაცია, შეჯამება
+supabase/
+  migrations/   სქემა, seed მონაცემები, RLS პოლისები, RPC ფუნქციები
+```
+
+- **მდგომარეობა URL-შია** (`?month=2026-06&status=unmatched&q=...`) — Zod-ით ვალიდირდება, ლინკი გაზიარებადია, back/forward მუშაობს
+- **თვეზე ერთი query** — სტატისტიკა, ფილტრები და სორტირება 89 რიგზე კლიენტზე გამოითვლება; mutations ინვალიდაციას თვის key-ზე აკეთებს
+- **Optimistic updates** — ხელით მიბმა/იგნორირება მყისიერად აისახება, შეცდომისას rollback
+- **RLS** — მონაცემები მხოლოდ ავტორიზებული მომხმარებლისთვის; RPC ფუნქციები `anon` როლისთვის დახურულია
+
+## ბონუს ფუნქციები
+
+- ძებნა გამგზავნის სახელით ან ს/კ-ით
+- CSV ექსპორტი (მოსალოდნელი vs ფაქტობრივი)
+- მატჩინგი Supabase RPC ფუნქციით client-side ლოგიკის ნაცვლად
