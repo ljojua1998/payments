@@ -3,7 +3,11 @@
 import { useState } from "react";
 import { CalendarDays, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { formatMonthLabel, getMonthRange } from "@/lib/format";
+import {
+  GEORGIAN_MONTHS_SHORT,
+  formatMonthLabel,
+  getMonthRange,
+} from "@/lib/format";
 import { AVAILABLE_MONTHS, type MonthKey } from "@/lib/schemas/dashboard";
 import { Button } from "@/components/ui/button";
 import {
@@ -14,10 +18,6 @@ import {
 
 const YEAR = 2026;
 const WEEKDAYS = ["ორშ", "სამ", "ოთხ", "ხუთ", "პარ", "შაბ", "კვი"];
-
-const shortMonthFormatter = new Intl.DateTimeFormat("ka-GE", {
-  month: "short",
-});
 
 type PeriodPickerProps = {
   month: MonthKey;
@@ -70,7 +70,7 @@ export function PeriodPicker({ month, day, onChange }: PeriodPickerProps) {
                       : "cursor-not-allowed text-muted-foreground/40",
                 )}
               >
-                {shortMonthFormatter.format(new Date(YEAR, index, 1))}
+                {GEORGIAN_MONTHS_SHORT[index]}
               </button>
             );
           })}

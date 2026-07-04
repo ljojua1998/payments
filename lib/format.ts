@@ -1,30 +1,54 @@
-const gelFormatter = new Intl.NumberFormat("ka-GE", {
-  style: "currency",
-  currency: "GEL",
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 2,
-});
+export const GEORGIAN_MONTHS = [
+  "იანვარი",
+  "თებერვალი",
+  "მარტი",
+  "აპრილი",
+  "მაისი",
+  "ივნისი",
+  "ივლისი",
+  "აგვისტო",
+  "სექტემბერი",
+  "ოქტომბერი",
+  "ნოემბერი",
+  "დეკემბერი",
+] as const;
 
-const dateFormatter = new Intl.DateTimeFormat("ka-GE", {
-  day: "numeric",
-  month: "short",
-});
-
-const monthFormatter = new Intl.DateTimeFormat("ka-GE", {
-  month: "long",
-  year: "numeric",
-});
+export const GEORGIAN_MONTHS_SHORT = [
+  "იან",
+  "თებ",
+  "მარ",
+  "აპრ",
+  "მაი",
+  "ივნ",
+  "ივლ",
+  "აგვ",
+  "სექ",
+  "ოქტ",
+  "ნოე",
+  "დეკ",
+] as const;
 
 export function formatGel(amount: number): string {
-  return gelFormatter.format(amount);
+  const sign = amount < 0 ? "-" : "";
+  const [whole, fraction] = Math.abs(amount).toFixed(2).split(".");
+  const grouped = whole.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+  return `${sign}${grouped},${fraction} ₾`;
 }
 
 export function formatDate(isoDate: string): string {
-  return dateFormatter.format(new Date(`${isoDate}T00:00:00`));
+  const [, month, day] = isoDate.split("-").map(Number);
+  return `${day} ${GEORGIAN_MONTHS_SHORT[month - 1]}`;
+}
+
+export function formatDateTime(isoTimestamp: string): string {
+  const date = new Date(isoTimestamp);
+  const time = `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
+  return `${date.getDate()} ${GEORGIAN_MONTHS_SHORT[date.getMonth()]}, ${time}`;
 }
 
 export function formatMonthLabel(month: string): string {
-  return monthFormatter.format(new Date(`${month}-01T00:00:00`));
+  const [year, monthNumber] = month.split("-").map(Number);
+  return `${GEORGIAN_MONTHS[monthNumber - 1]} ${year}`;
 }
 
 export function getMonthRange(month: string): { start: string; end: string } {

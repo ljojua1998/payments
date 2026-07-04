@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { Download, FileText, Loader2, Sparkles, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { formatDateTime } from "@/lib/format";
 import { createClient } from "@/lib/supabase/client";
 import { getDocumentDownloadUrl } from "@/lib/services/documents";
 import {
@@ -33,13 +34,6 @@ const STATUS_CONFIG: Record<
     className: "bg-destructive/10 text-destructive border-destructive/25",
   },
 };
-
-const dateFormatter = new Intl.DateTimeFormat("ka-GE", {
-  day: "numeric",
-  month: "short",
-  hour: "2-digit",
-  minute: "2-digit",
-});
 
 function formatSize(bytes: number): string {
   if (bytes >= 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
@@ -78,7 +72,7 @@ export function DocumentRow({ document }: { document: DocumentRecord }) {
             </p>
             <p className="mt-0.5 text-xs tabular-nums text-muted-foreground">
               {formatSize(document.size_bytes)} ·{" "}
-              {dateFormatter.format(new Date(document.created_at))}
+              {formatDateTime(document.created_at)}
             </p>
           </div>
         </div>
