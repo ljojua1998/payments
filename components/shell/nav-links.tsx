@@ -2,11 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FileText, LayoutDashboard } from "lucide-react";
+import { Building2, FileText, LayoutDashboard, Upload } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const NAV_ITEMS = [
   { href: "/", label: "მიმოხილვა", icon: LayoutDashboard },
+  { href: "/companies", label: "კომპანიები", icon: Building2 },
+  { href: "/import", label: "იმპორტი", icon: Upload },
   { href: "/documents", label: "დოკუმენტები", icon: FileText },
 ];
 
@@ -46,7 +48,7 @@ export function BottomNav() {
       aria-label="მთავარი ნავიგაცია"
       className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card pb-[env(safe-area-inset-bottom)] lg:hidden"
     >
-      <div className="grid grid-cols-2">
+      <div className="grid grid-cols-4">
         {NAV_ITEMS.map((item) => {
           const isActive = pathname === item.href;
           return (

@@ -17,6 +17,10 @@ export interface Contract {
   end_date: string | null;
 }
 
+export interface CompanyWithContracts extends Company {
+  contracts: Contract[];
+}
+
 export interface BankTransaction {
   id: string;
   doc_key: string;
