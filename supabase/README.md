@@ -9,6 +9,9 @@
 | 1 | `migrations/00001_reconciliation_schema.sql` | ქმნის `companies`, `contracts`, `bank_transactions` ცხრილებს, ინდექსებს და ამატებს 15 კომპანიას + 18 ხელშეკრულებას |
 | 2 | `migrations/00002_seed_bank_transactions.sql` | ამატებს 89 საბანკო ტრანზაქციას (აპრილი–ივნისი 2026, ყველა `unmatched`) |
 | 3 | `migrations/00003_auth_profiles.sql` | ქმნის `profiles` ცხრილს RLS-ით და ტრიგერს, რომელიც რეგისტრაციისას ავტომატურად ქმნის პროფილს |
+| 4 | `migrations/00004_rls_policies.sql` | რთავს RLS-ს ძირითად ცხრილებზე — მონაცემები მხოლოდ ავტორიზებული მომხმარებლისთვისაა ხელმისაწვდომი |
+
+> 00001-ის გაშვებისას თუ SQL Editor-მა RLS-ის დიალოგი გაჩვენათ, აირჩიეთ **Run without RLS** — RLS-ს მე-4 მიგრაცია რთავს policy-ებთან ერთად.
 
 ## ტელეფონით ავტორიზაციის ჩართვა
 
