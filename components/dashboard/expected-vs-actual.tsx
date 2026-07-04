@@ -7,6 +7,7 @@ import type { CompanyMonthlySummary } from "@/lib/types";
 import type { MonthKey } from "@/lib/schemas/dashboard";
 import { Button } from "@/components/ui/button";
 import { PaginationControls } from "@/components/ui/pagination";
+import { TruncatedText } from "@/components/ui/tooltip";
 import { usePagination } from "@/lib/hooks/use-pagination";
 
 type RowTone = "success" | "destructive" | "muted";
@@ -33,6 +34,17 @@ const TONE_FRAME: Record<RowTone, string> = {
   destructive: "border-destructive/45 bg-destructive/[0.05]",
   muted: "border-dashed border-muted-foreground/40 bg-muted/40",
 };
+
+const TONE_CHIP: Record<RowTone, string> = {
+  success: "bg-success/10 text-success",
+  destructive: "bg-destructive/10 text-destructive",
+  muted: "bg-muted text-muted-foreground",
+};
+
+function paidPercent(row: CompanyMonthlySummary): number {
+  if (row.expected_amount === 0) return row.actual_amount > 0 ? 100 : 0;
+  return Math.round((row.actual_amount / row.expected_amount) * 100);
+}
 
 function fillRatio(row: CompanyMonthlySummary): number {
   if (row.expected_amount === 0) return row.actual_amount > 0 ? 1 : 0;
@@ -133,22 +145,20 @@ export function ExpectedVsActual({
                     TONE_FRAME[tone],
                   )}
                 >
-                  <div className="flex items-baseline justify-between gap-3">
-                    <p
-                      className="min-w-0 truncate text-sm font-medium"
-                      title={`${row.company_name} · ს/კ ${row.tax_id}`}
-                    >
-                      {row.company_name}
-                    </p>
-                    <p
+                  <div className="flex items-center justify-between gap-3">
+                    <TruncatedText
+                      text={row.company_name}
+                      className="min-w-0 text-sm font-medium"
+                    />
+                    <span
                       className={cn(
-                        "shrink-0 text-sm font-semibold tabular-nums",
-                        TONE_TEXT[tone],
+                        "shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold tabular-nums",
+                        TONE_CHIP[tone],
                       )}
                     >
                       {difference > 0 ? "+" : ""}
                       {formatGel(difference)}
-                    </p>
+                    </span>
                   </div>
                   <div
                     className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-muted"
@@ -166,10 +176,18 @@ export function ExpectedVsActual({
                       style={{ width: `${fillRatio(row) * 100}%` }}
                     />
                   </div>
-                  <p className="mt-1 text-xs tabular-nums text-muted-foreground">
-                    ფაქტ. {row.actual_amount === 0 ? "—" : formatGel(row.actual_amount)}
-                    {" · "}მოსალ. {formatGel(row.expected_amount)}
-                  </p>
+                  <div className="mt-1 flex items-center justify-between gap-3 text-xs tabular-nums">
+                    <p className="text-muted-foreground">
+                      ფაქტ.{" "}
+                      {row.actual_amount === 0
+                        ? "—"
+                        : formatGel(row.actual_amount)}
+                      {" · "}მოსალ. {formatGel(row.expected_amount)}
+                    </p>
+                    <span className={cn("font-semibold", TONE_TEXT[tone])}>
+                      {paidPercent(row)}%
+                    </span>
+                  </div>
                 </li>
               );
             })}

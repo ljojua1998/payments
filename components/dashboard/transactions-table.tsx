@@ -5,7 +5,9 @@ import { cn } from "@/lib/utils";
 import { formatDate, formatGel } from "@/lib/format";
 import type { BankTransaction, Company } from "@/lib/types";
 import type { SortDirection, SortField } from "@/lib/schemas/dashboard";
+import { TruncatedText } from "@/components/ui/tooltip";
 import { StatusBadge } from "@/components/dashboard/status-badge";
+import { SuggestionChip } from "@/components/dashboard/suggestion-chip";
 import { TransactionActions } from "@/components/dashboard/transaction-actions";
 
 type SortState = { sort: SortField; dir: SortDirection };
@@ -56,16 +58,15 @@ function SortButton({
 function SenderCell({ transaction }: { transaction: BankTransaction }) {
   return (
     <div className="min-w-0">
-      <p className="truncate font-medium">
-        {transaction.sender_name ?? "უცნობი გამგზავნი"}
-      </p>
+      <TruncatedText
+        text={transaction.sender_name ?? "უცნობი გამგზავნი"}
+        className="font-medium"
+      />
       {transaction.purpose && (
-        <p
-          className="max-w-[26ch] truncate text-xs text-muted-foreground sm:max-w-[38ch]"
-          title={transaction.purpose}
-        >
-          {transaction.purpose}
-        </p>
+        <TruncatedText
+          text={transaction.purpose}
+          className="max-w-[26ch] text-xs text-muted-foreground sm:max-w-[38ch]"
+        />
       )}
     </div>
   );
@@ -73,15 +74,20 @@ function SenderCell({ transaction }: { transaction: BankTransaction }) {
 
 function MatchedCompanyCell({
   transaction,
+  onAssign,
 }: {
   transaction: BankTransaction;
+  onAssign: (transaction: BankTransaction, company: Company) => void;
 }) {
   if (!transaction.matched_company) {
+    if (transaction.status === "unmatched" && transaction.sender_name) {
+      return <SuggestionChip transaction={transaction} onAssign={onAssign} />;
+    }
     return <span className="text-muted-foreground">—</span>;
   }
   return (
-    <div>
-      <p className="truncate">{transaction.matched_company.name}</p>
+    <div className="min-w-0">
+      <TruncatedText text={transaction.matched_company.name} />
       {transaction.match_method && (
         <p className="text-xs text-muted-foreground">
           {transaction.match_method === "manual" ? "ხელით" : "ს/კ ზუსტი"}
@@ -195,7 +201,10 @@ export function TransactionsTable({
                   <StatusBadge status={transaction.status} />
                 </td>
                 <td className="max-w-[180px] py-3 pr-4">
-                  <MatchedCompanyCell transaction={transaction} />
+                  <MatchedCompanyCell
+                    transaction={transaction}
+                    onAssign={onAssign}
+                  />
                 </td>
                 <td className="py-3 text-right">{renderActions(transaction)}</td>
               </tr>
@@ -243,6 +252,11 @@ export function TransactionsTable({
                 </>
               )}
             </dl>
+            {transaction.status === "unmatched" && transaction.sender_name && (
+              <div className="mt-3">
+                <SuggestionChip transaction={transaction} onAssign={onAssign} />
+              </div>
+            )}
           </li>
         ))}
       </ul>
