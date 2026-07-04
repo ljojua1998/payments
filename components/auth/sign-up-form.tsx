@@ -13,11 +13,11 @@ import { AuthCard, AuthError } from "@/components/auth/auth-card";
 import { FormField } from "@/components/auth/form-field";
 import { PhoneInput } from "@/components/auth/phone-input";
 import { PasswordInput } from "@/components/auth/password-input";
-import { OtpVerifyStep } from "@/components/auth/otp-verify-step";
+import { OtpDialog } from "@/components/auth/otp-dialog";
 
 export function SignUpForm() {
   const router = useRouter();
-  const [step, setStep] = useState<"details" | "verify">("details");
+  const [otpOpen, setOtpOpen] = useState(false);
   const [fullName, setFullName] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
@@ -50,7 +50,7 @@ export function SignUpForm() {
       setAuthError(error);
       return;
     }
-    setStep("verify");
+    setOtpOpen(true);
   };
 
   const handleVerify = async (code: string) => {
@@ -77,18 +77,6 @@ export function SignUpForm() {
     router.refresh();
     return { error: null };
   };
-
-  if (step === "verify") {
-    return (
-      <OtpVerifyStep
-        phone={phone}
-        title="ნომრის დადასტურება"
-        onVerify={handleVerify}
-        onResend={() => startRegistration(phone)}
-        onBack={() => setStep("details")}
-      />
-    );
-  }
 
   return (
     <AuthCard
@@ -165,6 +153,15 @@ export function SignUpForm() {
           </Link>
         </p>
       </form>
+
+      <OtpDialog
+        open={otpOpen}
+        onClose={() => setOtpOpen(false)}
+        phone={phone}
+        title="ნომრის დადასტურება"
+        onVerify={handleVerify}
+        onResend={() => startRegistration(phone)}
+      />
     </AuthCard>
   );
 }

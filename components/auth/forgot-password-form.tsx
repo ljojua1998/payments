@@ -19,11 +19,11 @@ import { AuthCard, AuthError } from "@/components/auth/auth-card";
 import { FormField } from "@/components/auth/form-field";
 import { PhoneInput } from "@/components/auth/phone-input";
 import { PasswordInput } from "@/components/auth/password-input";
-import { OtpVerifyStep } from "@/components/auth/otp-verify-step";
+import { OtpDialog } from "@/components/auth/otp-dialog";
 
 export function ForgotPasswordForm() {
   const router = useRouter();
-  const [step, setStep] = useState<"phone" | "verify">("phone");
+  const [otpOpen, setOtpOpen] = useState(false);
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -50,7 +50,9 @@ export function ForgotPasswordForm() {
       setAuthError(error);
       return;
     }
-    setStep("verify");
+    setPassword("");
+    setConfirmPassword("");
+    setOtpOpen(true);
   };
 
   const handleVerify = async (code: string) => {
@@ -87,47 +89,6 @@ export function ForgotPasswordForm() {
     return { error: null };
   };
 
-  if (step === "verify") {
-    return (
-      <OtpVerifyStep
-        phone={phone}
-        title="პაროლის აღდგენა"
-        submitLabel="პაროლის შეცვლა"
-        onVerify={handleVerify}
-        onResend={() => startPasswordReset(phone)}
-        onBack={() => setStep("phone")}
-      >
-        <FormField
-          id="new-password"
-          label="ახალი პაროლი"
-          error={errors.password}
-          hint="მინიმუმ 8 სიმბოლო"
-        >
-          <PasswordInput
-            id="new-password"
-            value={password}
-            onChange={setPassword}
-            autoComplete="new-password"
-            invalid={Boolean(errors.password)}
-          />
-        </FormField>
-        <FormField
-          id="confirm-new-password"
-          label="გაიმეორეთ პაროლი"
-          error={errors.confirmPassword}
-        >
-          <PasswordInput
-            id="confirm-new-password"
-            value={confirmPassword}
-            onChange={setConfirmPassword}
-            autoComplete="new-password"
-            invalid={Boolean(errors.confirmPassword)}
-          />
-        </FormField>
-      </OtpVerifyStep>
-    );
-  }
-
   return (
     <AuthCard
       title="პაროლის აღდგენა"
@@ -160,6 +121,45 @@ export function ForgotPasswordForm() {
           </Link>
         </p>
       </form>
+
+      <OtpDialog
+        open={otpOpen}
+        onClose={() => setOtpOpen(false)}
+        phone={phone}
+        title="პაროლის აღდგენა"
+        submitLabel="პაროლის შეცვლა"
+        autoSubmit={false}
+        onVerify={handleVerify}
+        onResend={() => startPasswordReset(phone)}
+      >
+        <FormField
+          id="new-password"
+          label="ახალი პაროლი"
+          error={errors.password}
+          hint="მინიმუმ 8 სიმბოლო"
+        >
+          <PasswordInput
+            id="new-password"
+            value={password}
+            onChange={setPassword}
+            autoComplete="new-password"
+            invalid={Boolean(errors.password)}
+          />
+        </FormField>
+        <FormField
+          id="confirm-new-password"
+          label="გაიმეორეთ პაროლი"
+          error={errors.confirmPassword}
+        >
+          <PasswordInput
+            id="confirm-new-password"
+            value={confirmPassword}
+            onChange={setConfirmPassword}
+            autoComplete="new-password"
+            invalid={Boolean(errors.confirmPassword)}
+          />
+        </FormField>
+      </OtpDialog>
     </AuthCard>
   );
 }

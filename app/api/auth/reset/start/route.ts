@@ -28,7 +28,12 @@ export async function POST(request: Request) {
     );
   }
 
-  const result = await issueOtp(admin, parsed.data.phone, "reset");
+  const result = await issueOtp(
+    admin,
+    parsed.data.phone,
+    "reset",
+    request.headers.get("host"),
+  );
   if (!result.ok) {
     return NextResponse.json({ error: result.error }, { status: result.status });
   }

@@ -30,7 +30,12 @@ export async function POST(request: Request) {
     );
   }
 
-  const result = await issueOtp(admin, parsed.data.phone, "register");
+  const result = await issueOtp(
+    admin,
+    parsed.data.phone,
+    "register",
+    request.headers.get("host"),
+  );
   if (!result.ok) {
     return NextResponse.json({ error: result.error }, { status: result.status });
   }

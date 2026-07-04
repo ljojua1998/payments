@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 
 const CODE_LENGTH = 6;
@@ -9,10 +9,23 @@ type OtpInputProps = {
   value: string;
   onChange: (code: string) => void;
   invalid?: boolean;
+  autoFocus?: boolean;
 };
 
-export function OtpInput({ value, onChange, invalid }: OtpInputProps) {
+export function OtpInput({
+  value,
+  onChange,
+  invalid,
+  autoFocus,
+}: OtpInputProps) {
   const inputsRef = useRef<Array<HTMLInputElement | null>>([]);
+
+  useEffect(() => {
+    if (autoFocus) {
+      const timer = setTimeout(() => inputsRef.current[0]?.focus(), 50);
+      return () => clearTimeout(timer);
+    }
+  }, [autoFocus]);
 
   const focusCell = (index: number) => {
     inputsRef.current[Math.min(Math.max(index, 0), CODE_LENGTH - 1)]?.focus();
@@ -64,7 +77,7 @@ export function OtpInput({ value, onChange, invalid }: OtpInputProps) {
           }}
           type="text"
           inputMode="numeric"
-          autoComplete={index === 0 ? "one-time-code" : "off"}
+          autoComplete="one-time-code"
           maxLength={CODE_LENGTH}
           aria-label={`კოდის ${index + 1} ციფრი`}
           value={value[index] ?? ""}

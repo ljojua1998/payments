@@ -1,6 +1,6 @@
 import { createHash, randomInt } from "crypto";
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { sendSms } from "@/lib/server/sms";
+import { otpSmsText, sendSms } from "@/lib/server/sms";
 
 const OTP_TTL_MINUTES = 10;
 const RESEND_COOLDOWN_SECONDS = 55;
@@ -19,6 +19,7 @@ export async function issueOtp(
   admin: SupabaseClient,
   phone: string,
   purpose: OtpPurpose,
+  host: string | null,
 ): Promise<OtpResult> {
   const hourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
   const { data: recent, error: recentError } = await admin
@@ -70,7 +71,7 @@ export async function issueOtp(
   }
 
   try {
-    await sendSms(phone, `ბალანსი: თქვენი დადასტურების კოდია ${code}`);
+    await sendSms(phone, otpSmsText(code, host));
   } catch {
     return {
       ok: false,
