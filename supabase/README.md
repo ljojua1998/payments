@@ -12,6 +12,7 @@
 | 4 | `migrations/00004_rls_policies.sql` | რთავს RLS-ს ძირითად ცხრილებზე — მონაცემები მხოლოდ ავტორიზებული მომხმარებლისთვისაა ხელმისაწვდომი |
 | 5 | `migrations/00005_matching_and_summary.sql` | `match_transactions_by_inn()` — ავტო-მატჩინგის RPC და `monthly_company_summary(month)` — მოსალოდნელი vs ფაქტობრივი შეჯამება |
 | 6 | `migrations/00006_phone_otps.sql` | `phone_otps` ცხრილი SMS კოდებისთვის და profiles ტრიგერის განახლება |
+| 7 | `migrations/00007_documents.sql` | `documents` ცხრილი, storage bucket და owner-only RLS პოლისები PDF დოკუმენტებისთვის |
 
 > 00001-ის გაშვებისას თუ SQL Editor-მა RLS-ის დიალოგი გაჩვენათ, აირჩიეთ **Run without RLS** — RLS-ს მე-4 მიგრაცია რთავს policy-ებთან ერთად.
 
@@ -34,6 +35,10 @@ SUPABASE_SECRET_KEY=<secret-key>
 
 SMS_PROVIDER_API_KEY=<ubill-api-key>
 SMS_BRAND_ID=<ubill-brand-id>
+
+ANTHROPIC_API_KEY=<anthropic-api-key>
 ```
+
+`ANTHROPIC_API_KEY` საჭიროა PDF დოკუმენტების AI ანალიზისთვის (Claude API) — მის გარეშე ატვირთვა მუშაობს, ანალიზის ღილაკი კი შესაბამის შეტყობინებას აჩვენებს.
 
 Supabase მნიშვნელობები: Dashboard → Project Settings → API Keys. `SUPABASE_SECRET_KEY` მხოლოდ სერვერზე გამოიყენება (OTP ვერიფიკაცია, მომხმარებლის შექმნა) და კლიენტში არასდროს ხვდება.

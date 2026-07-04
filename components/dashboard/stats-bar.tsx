@@ -1,3 +1,10 @@
+import {
+  CircleCheck,
+  CircleX,
+  Percent,
+  ReceiptText,
+  type LucideIcon,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatGel } from "@/lib/format";
 import type { BankTransaction } from "@/lib/types";
@@ -47,19 +54,37 @@ function StatCard({
   label,
   value,
   detail,
+  icon: Icon,
   tone,
 }: {
   label: string;
   value: string;
   detail: string;
+  icon: LucideIcon;
   tone?: "success" | "destructive";
 }) {
   return (
-    <div className="rounded-xl border border-border bg-card p-4 sm:p-5">
-      <p className="text-[13px] font-medium text-muted-foreground">{label}</p>
+    <div className="rounded-xl border border-border bg-card p-4">
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-[13px] font-medium text-muted-foreground">
+          {label}
+        </p>
+        <span
+          className={cn(
+            "flex h-7 w-7 items-center justify-center rounded-md",
+            tone === "success"
+              ? "bg-success/10 text-success"
+              : tone === "destructive"
+                ? "bg-destructive/10 text-destructive"
+                : "bg-primary/10 text-primary",
+          )}
+        >
+          <Icon size={15} />
+        </span>
+      </div>
       <p
         className={cn(
-          "mt-1.5 text-2xl font-semibold tabular-nums",
+          "mt-2 text-2xl font-semibold tabular-nums",
           tone === "success" && "text-success",
           tone === "destructive" && "text-destructive",
         )}
@@ -99,17 +124,20 @@ export function StatsBar({
         label="სულ ტრანზაქცია"
         value={String(stats.totalCount)}
         detail={formatGel(stats.totalAmount)}
+        icon={ReceiptText}
       />
       <StatCard
         label="დამთხვეული"
         value={String(stats.matchedCount)}
         detail={formatGel(stats.matchedAmount)}
+        icon={CircleCheck}
         tone="success"
       />
       <StatCard
         label="შეუსაბამო"
         value={String(stats.unmatchedCount)}
         detail={formatGel(stats.unmatchedAmount)}
+        icon={CircleX}
         tone="destructive"
       />
       <StatCard
@@ -120,6 +148,7 @@ export function StatsBar({
             : `${Math.round(stats.matchRate * 100)}%`
         }
         detail={`${stats.matchedCount} / ${stats.matchedCount + stats.unmatchedCount}`}
+        icon={Percent}
       />
     </div>
   );

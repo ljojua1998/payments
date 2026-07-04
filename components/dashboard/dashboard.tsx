@@ -16,7 +16,7 @@ import {
 import type { BankTransaction, Company } from "@/lib/types";
 import type { SortField, StatusFilter } from "@/lib/schemas/dashboard";
 import { Button } from "@/components/ui/button";
-import { MonthSwitcher } from "@/components/dashboard/month-switcher";
+import { PeriodPicker } from "@/components/dashboard/period-picker";
 import { StatsBar, computeMonthStats } from "@/components/dashboard/stats-bar";
 import { TransactionsTable } from "@/components/dashboard/transactions-table";
 import { ExpectedVsActual } from "@/components/dashboard/expected-vs-actual";
@@ -62,35 +62,42 @@ export function Dashboard() {
   const matching = useRunMatching();
   const transactionAction = useTransactionAction(filters.month);
 
-  const transactions = useMemo(
-    () => transactionsQuery.data ?? [],
-    [transactionsQuery.data],
+  const periodTransactions = useMemo(() => {
+    const monthRows = transactionsQuery.data ?? [];
+    if (!filters.day) return monthRows;
+    return monthRows.filter(
+      (transaction) => Number(transaction.entry_date.slice(-2)) === filters.day,
+    );
+  }, [transactionsQuery.data, filters.day]);
+
+  const stats = useMemo(
+    () => computeMonthStats(periodTransactions),
+    [periodTransactions],
   );
-  const stats = useMemo(() => computeMonthStats(transactions), [transactions]);
   const visibleTransactions = useMemo(
     () =>
       filterAndSort(
-        transactions,
+        periodTransactions,
         filters.status,
         filters.q,
         filters.sort,
         filters.dir,
       ),
-    [transactions, filters.status, filters.q, filters.sort, filters.dir],
+    [periodTransactions, filters.status, filters.q, filters.sort, filters.dir],
   );
 
   const statusCounts = useMemo(() => {
     const counts: Record<StatusFilter, number> = {
-      all: transactions.length,
+      all: periodTransactions.length,
       matched: 0,
       unmatched: 0,
       ignored: 0,
     };
-    for (const transaction of transactions) {
+    for (const transaction of periodTransactions) {
       counts[transaction.status] += 1;
     }
     return counts;
-  }, [transactions]);
+  }, [periodTransactions]);
 
   const handleSortChange = (sort: SortField) => {
     if (filters.sort === sort) {
@@ -105,12 +112,14 @@ export function Dashboard() {
 
   return (
     <div className="flex flex-col gap-5">
-      <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-        <MonthSwitcher
-          value={filters.month}
-          onChange={(month) => setFilters({ month })}
-        />
-        <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h1 className="text-xl font-semibold tracking-tight">მიმოხილვა</h1>
+          <p className="text-sm text-muted-foreground">
+            გადახდების შედარება ხელშეკრულებებთან
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2.5">
           {matching.isSuccess && (
             <span className="text-[13px] text-success">
               დაემთხვა {matching.data} ტრანზაქცია
@@ -121,6 +130,11 @@ export function Dashboard() {
               მატჩინგი ვერ შესრულდა
             </span>
           )}
+          <PeriodPicker
+            month={filters.month}
+            day={filters.day}
+            onChange={(month, day) => setFilters({ month, day })}
+          />
           <Button
             onClick={() => matching.mutate()}
             disabled={matching.isPending}
@@ -134,101 +148,101 @@ export function Dashboard() {
 
       <StatsBar stats={stats} isLoading={transactionsQuery.isPending} />
 
-      <section className="rounded-xl border border-border bg-card">
-        <div className="flex flex-col gap-3 border-b border-border px-4 py-4 sm:px-5">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <h2 className="font-display text-lg font-semibold">
-              ტრანზაქციები
-            </h2>
-            <label className="relative w-full sm:w-64">
-              <Search
-                size={15}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-              />
-              <input
-                type="search"
-                value={filters.q}
-                onChange={(event) => setFilters({ q: event.target.value })}
-                placeholder="ძებნა: სახელი ან ს/კ"
-                aria-label="ძებნა გამგზავნის სახელით ან საიდენტიფიკაციო კოდით"
-                className="h-9 w-full rounded-md border border-input bg-background pl-9 pr-3 text-sm outline-none transition-colors placeholder:text-muted-foreground/60 focus:ring-2 focus:ring-ring"
-              />
-            </label>
-          </div>
-          <div className="flex flex-wrap gap-1.5">
-            {STATUS_TABS.map((tab) => (
-              <button
-                key={tab.value}
-                onClick={() => setFilters({ status: tab.value })}
-                className={cn(
-                  "rounded-full border px-3 py-1 text-[13px] font-medium transition-colors",
-                  filters.status === tab.value
-                    ? "border-primary bg-primary text-primary-foreground"
-                    : "border-border bg-transparent text-muted-foreground hover:text-foreground",
-                )}
-              >
-                {tab.label}
-                <span className="ml-1.5 tabular-nums opacity-70">
-                  {statusCounts[tab.value]}
-                </span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="px-4 py-4 sm:px-5">
-          {transactionsQuery.isPending ? (
-            <div className="flex flex-col gap-2">
-              {Array.from({ length: 8 }, (_, index) => (
-                <div
-                  key={index}
-                  className="h-11 animate-pulse rounded-md bg-muted"
+      <div className="grid items-start gap-5 xl:grid-cols-3">
+        <section className="rounded-xl border border-border bg-card xl:col-span-2">
+          <div className="flex flex-col gap-3 border-b border-border px-4 py-3.5">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h2 className="text-base font-semibold">ტრანზაქციები</h2>
+              <label className="relative w-full sm:w-64">
+                <Search
+                  size={15}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
                 />
+                <input
+                  type="search"
+                  value={filters.q}
+                  onChange={(event) => setFilters({ q: event.target.value })}
+                  placeholder="ძებნა: სახელი ან ს/კ"
+                  aria-label="ძებნა გამგზავნის სახელით ან საიდენტიფიკაციო კოდით"
+                  className="h-9 w-full rounded-md border border-input bg-background pl-9 pr-3 text-sm outline-none transition-colors placeholder:text-muted-foreground/60 focus:ring-2 focus:ring-ring"
+                />
+              </label>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {STATUS_TABS.map((tab) => (
+                <button
+                  key={tab.value}
+                  onClick={() => setFilters({ status: tab.value })}
+                  className={cn(
+                    "rounded-full border px-3 py-1 text-[13px] font-medium transition-colors",
+                    filters.status === tab.value
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-border bg-transparent text-muted-foreground hover:text-foreground",
+                  )}
+                >
+                  {tab.label}
+                  <span className="ml-1.5 tabular-nums opacity-70">
+                    {statusCounts[tab.value]}
+                  </span>
+                </button>
               ))}
             </div>
-          ) : transactionsQuery.isError ? (
-            <div className="flex flex-col items-center gap-3 py-10 text-center">
-              <p className="text-sm text-destructive">
-                {transactionsQuery.error.message}
-              </p>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => transactionsQuery.refetch()}
-              >
-                თავიდან ცდა
-              </Button>
-            </div>
-          ) : (
-            <TransactionsTable
-              transactions={visibleTransactions}
-              companies={companiesQuery.data ?? []}
-              sortState={{ sort: filters.sort, dir: filters.dir }}
-              onSortChange={handleSortChange}
-              onAssign={(transaction, company: Company) =>
-                runAction({ type: "assign", transaction, company })
-              }
-              onUnmatch={(transaction) =>
-                runAction({ type: "unmatch", transaction })
-              }
-              onIgnore={(transaction) =>
-                runAction({ type: "ignore", transaction })
-              }
-              onRestore={(transaction) =>
-                runAction({ type: "restore", transaction })
-              }
-            />
-          )}
-        </div>
-      </section>
+          </div>
 
-      <ExpectedVsActual
-        rows={summaryQuery.data ?? []}
-        month={filters.month}
-        isLoading={summaryQuery.isPending}
-        error={summaryQuery.isError ? summaryQuery.error.message : null}
-        onRetry={() => summaryQuery.refetch()}
-      />
+          <div className="px-4 py-4">
+            {transactionsQuery.isPending ? (
+              <div className="flex flex-col gap-2">
+                {Array.from({ length: 8 }, (_, index) => (
+                  <div
+                    key={index}
+                    className="h-11 animate-pulse rounded-md bg-muted"
+                  />
+                ))}
+              </div>
+            ) : transactionsQuery.isError ? (
+              <div className="flex flex-col items-center gap-3 py-10 text-center">
+                <p className="text-sm text-destructive">
+                  {transactionsQuery.error.message}
+                </p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => transactionsQuery.refetch()}
+                >
+                  თავიდან ცდა
+                </Button>
+              </div>
+            ) : (
+              <TransactionsTable
+                transactions={visibleTransactions}
+                companies={companiesQuery.data ?? []}
+                sortState={{ sort: filters.sort, dir: filters.dir }}
+                onSortChange={handleSortChange}
+                onAssign={(transaction, company: Company) =>
+                  runAction({ type: "assign", transaction, company })
+                }
+                onUnmatch={(transaction) =>
+                  runAction({ type: "unmatch", transaction })
+                }
+                onIgnore={(transaction) =>
+                  runAction({ type: "ignore", transaction })
+                }
+                onRestore={(transaction) =>
+                  runAction({ type: "restore", transaction })
+                }
+              />
+            )}
+          </div>
+        </section>
+
+        <ExpectedVsActual
+          rows={summaryQuery.data ?? []}
+          month={filters.month}
+          isLoading={summaryQuery.isPending}
+          error={summaryQuery.isError ? summaryQuery.error.message : null}
+          onRetry={() => summaryQuery.refetch()}
+        />
+      </div>
     </div>
   );
 }

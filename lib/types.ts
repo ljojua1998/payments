@@ -41,3 +41,16 @@ export interface CompanyMonthlySummary {
   expected_amount: number;
   actual_amount: number;
 }
+
+export type DocumentStatus = "uploaded" | "analyzing" | "analyzed" | "error";
+
+export interface DocumentRecord {
+  id: string;
+  user_id: string;
+  name: string;
+  storage_path: string;
+  size_bytes: number;
+  status: DocumentStatus;
+  summary: string | null;
+  created_at: string;
+}

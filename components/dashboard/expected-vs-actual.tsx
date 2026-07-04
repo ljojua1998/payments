@@ -20,11 +20,16 @@ const TONE_TEXT: Record<RowTone, string> = {
   muted: "text-muted-foreground",
 };
 
-const TONE_DOT: Record<RowTone, string> = {
+const TONE_BAR: Record<RowTone, string> = {
   success: "bg-success",
   destructive: "bg-destructive",
-  muted: "bg-muted-foreground/50",
+  muted: "bg-muted-foreground/40",
 };
+
+function fillRatio(row: CompanyMonthlySummary): number {
+  if (row.expected_amount === 0) return row.actual_amount > 0 ? 1 : 0;
+  return Math.min(row.actual_amount / row.expected_amount, 1);
+}
 
 function exportCsv(rows: CompanyMonthlySummary[], month: MonthKey) {
   const header = "კომპანია,ს/კ,მოსალოდნელი,ფაქტობრივი,სხვაობა";
@@ -64,35 +69,33 @@ export function ExpectedVsActual({
   onRetry,
 }: ExpectedVsActualProps) {
   return (
-    <section className="rounded-xl border border-border bg-card">
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-4 sm:px-5">
-        <div>
-          <h2 className="font-display text-lg font-semibold">
-            მოსალოდნელი vs ფაქტობრივი
-          </h2>
-          <p className="text-[13px] text-muted-foreground">
-            {formatMonthLabel(month)} — აქტიური ხელშეკრულებების მიხედვით
+    <section className="flex flex-col rounded-xl border border-border bg-card">
+      <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-3.5">
+        <div className="min-w-0">
+          <h2 className="text-base font-semibold">მოსალოდნელი vs ფაქტობრივი</h2>
+          <p className="truncate text-xs text-muted-foreground">
+            {formatMonthLabel(month)} · აქტიური ხელშეკრულებები
           </p>
         </div>
         <Button
           variant="outline"
           size="sm"
-          className="gap-2"
+          className="shrink-0 gap-1.5"
           disabled={rows.length === 0}
           onClick={() => exportCsv(rows, month)}
         >
-          <Download size={15} />
-          CSV ექსპორტი
+          <Download size={14} />
+          CSV
         </Button>
       </div>
 
-      <div className="px-4 pb-4 sm:px-5 sm:pb-5">
+      <div className="flex-1 px-4 py-3">
         {isLoading ? (
-          <div className="flex flex-col gap-2 pt-4">
-            {Array.from({ length: 5 }, (_, index) => (
+          <div className="flex flex-col gap-2.5">
+            {Array.from({ length: 6 }, (_, index) => (
               <div
                 key={index}
-                className="h-10 animate-pulse rounded-md bg-muted"
+                className="h-12 animate-pulse rounded-md bg-muted"
               />
             ))}
           </div>
@@ -103,71 +106,58 @@ export function ExpectedVsActual({
               თავიდან ცდა
             </Button>
           </div>
+        ) : rows.length === 0 ? (
+          <p className="py-10 text-center text-sm text-muted-foreground">
+            ამ თვეში მონაცემები არ არის
+          </p>
         ) : (
-          <div className="overflow-x-auto pt-1">
-            <table className="w-full min-w-[560px] text-sm">
-              <thead>
-                <tr className="border-b border-border text-left text-[13px] text-muted-foreground">
-                  <th className="py-2.5 pr-4 font-medium">კომპანია</th>
-                  <th className="py-2.5 pr-4 text-right font-medium">
-                    მოსალოდნელი
-                  </th>
-                  <th className="py-2.5 pr-4 text-right font-medium">
-                    ფაქტობრივი
-                  </th>
-                  <th className="py-2.5 text-right font-medium">სხვაობა</th>
-                </tr>
-              </thead>
-              <tbody>
-                {rows.map((row) => {
-                  const tone = rowTone(row);
-                  const difference = row.actual_amount - row.expected_amount;
-                  return (
-                    <tr
-                      key={row.company_id}
-                      className="border-b border-border/60 last:border-0"
+          <ul className="flex flex-col divide-y divide-border/70">
+            {rows.map((row) => {
+              const tone = rowTone(row);
+              const difference = row.actual_amount - row.expected_amount;
+              return (
+                <li key={row.company_id} className="py-2.5">
+                  <div className="flex items-baseline justify-between gap-3">
+                    <p
+                      className="min-w-0 truncate text-sm font-medium"
+                      title={`${row.company_name} · ს/კ ${row.tax_id}`}
                     >
-                      <td className="py-3 pr-4">
-                        <span className="flex items-center gap-2.5">
-                          <span
-                            className={cn(
-                              "h-2 w-2 shrink-0 rounded-full",
-                              TONE_DOT[tone],
-                            )}
-                          />
-                          <span className="min-w-0">
-                            <span className="block truncate font-medium">
-                              {row.company_name}
-                            </span>
-                            <span className="block text-xs text-muted-foreground">
-                              ს/კ {row.tax_id}
-                            </span>
-                          </span>
-                        </span>
-                      </td>
-                      <td className="whitespace-nowrap py-3 pr-4 text-right tabular-nums">
-                        {formatGel(row.expected_amount)}
-                      </td>
-                      <td className="whitespace-nowrap py-3 pr-4 text-right tabular-nums">
-                        {row.actual_amount === 0
-                          ? "—"
-                          : formatGel(row.actual_amount)}
-                      </td>
-                      <td
-                        className={cn(
-                          "whitespace-nowrap py-3 text-right font-medium tabular-nums",
-                          TONE_TEXT[tone],
-                        )}
-                      >
-                        {difference > 0 ? "+" : ""}
-                        {formatGel(difference)}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                      {row.company_name}
+                    </p>
+                    <p
+                      className={cn(
+                        "shrink-0 text-sm font-semibold tabular-nums",
+                        TONE_TEXT[tone],
+                      )}
+                    >
+                      {difference > 0 ? "+" : ""}
+                      {formatGel(difference)}
+                    </p>
+                  </div>
+                  <div
+                    className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-muted"
+                    role="progressbar"
+                    aria-valuenow={Math.round(fillRatio(row) * 100)}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-label={`${row.company_name} — გადახდილია ${Math.round(fillRatio(row) * 100)}%`}
+                  >
+                    <div
+                      className={cn(
+                        "h-full rounded-full transition-[width] duration-300",
+                        TONE_BAR[tone],
+                      )}
+                      style={{ width: `${fillRatio(row) * 100}%` }}
+                    />
+                  </div>
+                  <p className="mt-1 text-xs tabular-nums text-muted-foreground">
+                    ფაქტ. {row.actual_amount === 0 ? "—" : formatGel(row.actual_amount)}
+                    {" · "}მოსალ. {formatGel(row.expected_amount)}
+                  </p>
+                </li>
+              );
+            })}
+          </ul>
         )}
       </div>
     </section>
