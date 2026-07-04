@@ -1,12 +1,15 @@
 "use client";
 
 import { useDocuments, useUploadDocuments } from "@/lib/hooks/use-documents";
+import { usePagination } from "@/lib/hooks/use-pagination";
 import { Button } from "@/components/ui/button";
+import { PaginationControls } from "@/components/ui/pagination";
 import { UploadDropzone } from "@/components/documents/upload-dropzone";
 import { DocumentRow } from "@/components/documents/document-row";
 
 export function DocumentsView() {
   const documentsQuery = useDocuments();
+  const pagination = usePagination(documentsQuery.data ?? []);
   const upload = useUploadDocuments();
 
   return (
@@ -71,11 +74,25 @@ export function DocumentsView() {
             ჯერ არაფერია ატვირთული — დაიწყეთ ზემოთ, პირველი PDF-ით
           </p>
         ) : (
-          <ul className="divide-y divide-border/70">
-            {documentsQuery.data.map((document) => (
-              <DocumentRow key={document.id} document={document} />
-            ))}
-          </ul>
+          <>
+            <ul className="divide-y divide-border/70">
+              {pagination.pageItems.map((document) => (
+                <DocumentRow key={document.id} document={document} />
+              ))}
+            </ul>
+            {pagination.total > 10 && (
+              <div className="border-t border-border px-4 py-3 sm:px-5">
+                <PaginationControls
+                  page={pagination.page}
+                  pageCount={pagination.pageCount}
+                  pageSize={pagination.pageSize}
+                  total={pagination.total}
+                  onPageChange={pagination.setPage}
+                  onPageSizeChange={pagination.setPageSize}
+                />
+              </div>
+            )}
+          </>
         )}
       </section>
     </div>

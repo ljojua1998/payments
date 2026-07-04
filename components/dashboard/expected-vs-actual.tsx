@@ -6,6 +6,8 @@ import { formatGel, formatMonthLabel } from "@/lib/format";
 import type { CompanyMonthlySummary } from "@/lib/types";
 import type { MonthKey } from "@/lib/schemas/dashboard";
 import { Button } from "@/components/ui/button";
+import { PaginationControls } from "@/components/ui/pagination";
+import { usePagination } from "@/lib/hooks/use-pagination";
 
 type RowTone = "success" | "destructive" | "muted";
 
@@ -68,6 +70,8 @@ export function ExpectedVsActual({
   error,
   onRetry,
 }: ExpectedVsActualProps) {
+  const pagination = usePagination(rows);
+
   return (
     <section className="flex flex-col rounded-xl border border-border bg-card">
       <div className="flex items-center justify-between gap-3 border-b border-border px-4 py-3.5">
@@ -112,7 +116,7 @@ export function ExpectedVsActual({
           </p>
         ) : (
           <ul className="flex flex-col divide-y divide-border/70">
-            {rows.map((row) => {
+            {pagination.pageItems.map((row) => {
               const tone = rowTone(row);
               const difference = row.actual_amount - row.expected_amount;
               return (
@@ -158,6 +162,18 @@ export function ExpectedVsActual({
               );
             })}
           </ul>
+        )}
+        {!isLoading && !error && pagination.total > 10 && (
+          <div className="pt-2">
+            <PaginationControls
+              page={pagination.page}
+              pageCount={pagination.pageCount}
+              pageSize={pagination.pageSize}
+              total={pagination.total}
+              onPageChange={pagination.setPage}
+              onPageSizeChange={pagination.setPageSize}
+            />
+          </div>
         )}
       </div>
     </section>

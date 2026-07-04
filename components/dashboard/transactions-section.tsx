@@ -13,6 +13,8 @@ import type {
   StatusFilter,
 } from "@/lib/schemas/dashboard";
 import { Button } from "@/components/ui/button";
+import { PaginationControls } from "@/components/ui/pagination";
+import { usePagination } from "@/lib/hooks/use-pagination";
 import { TransactionsTable } from "@/components/dashboard/transactions-table";
 
 const SEARCH_DEBOUNCE_MS = 300;
@@ -101,6 +103,13 @@ export function TransactionsSection({
     [transactions, filters.status, searchInput, filters.sort, filters.dir],
   );
 
+  const pagination = usePagination(visibleTransactions);
+  const { setPage } = pagination;
+
+  useEffect(() => {
+    setPage(1);
+  }, [filters.status, filters.month, filters.day, searchInput, setPage]);
+
   const statusCounts = useMemo(() => {
     const counts: Record<StatusFilter, number> = {
       all: transactions.length,
@@ -184,24 +193,34 @@ export function TransactionsSection({
             </Button>
           </div>
         ) : (
-          <TransactionsTable
-            transactions={visibleTransactions}
-            companies={companiesQuery.data ?? []}
-            sortState={{ sort: filters.sort, dir: filters.dir }}
-            onSortChange={handleSortChange}
-            onAssign={(transaction, company: Company) =>
-              runAction({ type: "assign", transaction, company })
-            }
-            onUnmatch={(transaction) =>
-              runAction({ type: "unmatch", transaction })
-            }
-            onIgnore={(transaction) =>
-              runAction({ type: "ignore", transaction })
-            }
-            onRestore={(transaction) =>
-              runAction({ type: "restore", transaction })
-            }
-          />
+          <div className="flex flex-col gap-4">
+            <TransactionsTable
+              transactions={pagination.pageItems}
+              companies={companiesQuery.data ?? []}
+              sortState={{ sort: filters.sort, dir: filters.dir }}
+              onSortChange={handleSortChange}
+              onAssign={(transaction, company: Company) =>
+                runAction({ type: "assign", transaction, company })
+              }
+              onUnmatch={(transaction) =>
+                runAction({ type: "unmatch", transaction })
+              }
+              onIgnore={(transaction) =>
+                runAction({ type: "ignore", transaction })
+              }
+              onRestore={(transaction) =>
+                runAction({ type: "restore", transaction })
+              }
+            />
+            <PaginationControls
+              page={pagination.page}
+              pageCount={pagination.pageCount}
+              pageSize={pagination.pageSize}
+              total={pagination.total}
+              onPageChange={pagination.setPage}
+              onPageSizeChange={pagination.setPageSize}
+            />
+          </div>
         )}
       </div>
     </section>

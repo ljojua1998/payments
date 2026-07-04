@@ -7,6 +7,8 @@ import { formatDate, formatGel } from "@/lib/format";
 import { useCompaniesWithContracts } from "@/lib/hooks/use-companies-admin";
 import type { Company, Contract, ContractStatus } from "@/lib/types";
 import { Button } from "@/components/ui/button";
+import { PaginationControls } from "@/components/ui/pagination";
+import { usePagination } from "@/lib/hooks/use-pagination";
 import { CompanyDialog } from "@/components/companies/company-dialog";
 import { ContractDialog } from "@/components/companies/contract-dialog";
 import { ContractStatusDialog } from "@/components/companies/contract-status-dialog";
@@ -86,6 +88,7 @@ function ContractRow({
 
 export function CompaniesView() {
   const companiesQuery = useCompaniesWithContracts();
+  const pagination = usePagination(companiesQuery.data ?? []);
   const [contractTarget, setContractTarget] = useState<Company | null>(null);
   const [statusTarget, setStatusTarget] = useState<{
     contract: Contract;
@@ -128,7 +131,7 @@ export function CompaniesView() {
         </div>
       ) : (
         <ul className="flex flex-col gap-3">
-          {companiesQuery.data.map((company) => (
+          {pagination.pageItems.map((company) => (
             <li
               key={company.id}
               className="rounded-xl border border-border bg-card px-4 py-3.5 sm:px-5"
@@ -171,6 +174,17 @@ export function CompaniesView() {
             </li>
           ))}
         </ul>
+      )}
+
+      {companiesQuery.isSuccess && (
+        <PaginationControls
+          page={pagination.page}
+          pageCount={pagination.pageCount}
+          pageSize={pagination.pageSize}
+          total={pagination.total}
+          onPageChange={pagination.setPage}
+          onPageSizeChange={pagination.setPageSize}
+        />
       )}
 
       {contractTarget && (
