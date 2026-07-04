@@ -46,6 +46,13 @@ export interface CompanyMonthlySummary {
   actual_amount: number;
 }
 
+export interface CompanySuggestion {
+  company_id: string;
+  company_name: string;
+  tax_id: string;
+  score: number;
+}
+
 export type DocumentStatus = "uploaded" | "analyzing" | "analyzed" | "error";
 
 export interface DocumentRecord {
