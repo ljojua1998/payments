@@ -1,4 +1,5 @@
 import { Check } from "lucide-react";
+import { PaymentsLogo } from "@/components/logo";
 
 const LEDGER_ROWS = [
   { sender: "შპს გეოტრანსი", amount: "1 500,00 ₾", delay: "0s" },
@@ -9,15 +10,7 @@ const LEDGER_ROWS = [
 export function BrandMark({ compact = false }: { compact?: boolean }) {
   return (
     <span className="inline-flex items-center gap-2.5">
-      <span
-        className={
-        compact
-          ? "flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-base font-bold text-primary-foreground"
-          : "flex h-10 w-10 items-center justify-center rounded-xl bg-gold text-lg font-bold text-brand-deep"
-        }
-      >
-        ₾
-      </span>
+      <PaymentsLogo size={compact ? 30 : 38} />
       <span
         className={
           compact
@@ -25,7 +18,7 @@ export function BrandMark({ compact = false }: { compact?: boolean }) {
             : "font-display text-xl font-semibold text-white"
         }
       >
-        ბალანსი
+        Payments
       </span>
     </span>
   );

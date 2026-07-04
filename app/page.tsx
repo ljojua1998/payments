@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { LogoutButton } from "@/components/logout-button";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 import { Dashboard } from "@/components/dashboard/dashboard";
+import { PaymentsLogo } from "@/components/logo";
 
 async function UserMenu() {
   const supabase = await createClient();
@@ -34,10 +35,8 @@ export default function Home() {
       <header className="border-b border-border bg-card">
         <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-5">
           <span className="inline-flex items-center gap-2.5">
-            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-base font-bold text-primary-foreground">
-              ₾
-            </span>
-            <span className="font-display text-lg font-semibold">ბალანსი</span>
+            <PaymentsLogo size={30} />
+            <span className="font-display text-lg font-semibold">Payments</span>
           </span>
           <Suspense
             fallback={<div className="h-9 w-24 animate-pulse rounded-md bg-muted" />}

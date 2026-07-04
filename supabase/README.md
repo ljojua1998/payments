@@ -20,7 +20,7 @@
 რეგისტრაცია/შესვლა ტელეფონის ნომრით + SMS OTP კოდით მუშაობს **საკუთარი SMS პროვაიდერით** (ubill.dev) — Supabase-ის Phone პროვაიდერი და Twilio საჭირო არ არის:
 
 - OTP კოდებს სერვერი (Next.js API routes) აგენერირებს, ჰეშირებულს ინახავს `phone_otps` ცხრილში (ვადა 10 წთ, მაქს. 5 ცდა, resend cooldown) და SMS-ით აგზავნის
-- სესიებს Supabase Auth მართავს — მომხმარებელი იქმნება Admin API-თ, ნომერი კი შიდა ელფოსტად აისახება (`995XXXXXXXXX@sms.balansi.app`)
+- სესიებს Supabase Auth მართავს — მომხმარებელი იქმნება Admin API-თ, ნომერი კი შიდა ელფოსტად აისახება (`995XXXXXXXXX@sms.payments.app`)
 - Dashboard-ში არაფრის ჩართვა არ გჭირდებათ — Email პროვაიდერი (default-ად ჩართული) საკმარისია
 
 ## Environment ცვლადები

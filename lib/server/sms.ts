@@ -6,7 +6,7 @@ type UbillResponse = {
 };
 
 export function otpSmsText(code: string, host: string | null): string {
-  const base = `ბალანსი: თქვენი დადასტურების კოდია ${code}`;
+  const base = `Payments: თქვენი დადასტურების კოდია ${code}`;
   return host ? `${base}\n\n@${host} #${code}` : base;
 }
 

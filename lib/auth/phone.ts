@@ -19,5 +19,5 @@ export function toE164(digits: string): string {
 }
 
 export function toAuthEmail(digits: string): string {
-  return `995${digits}@sms.balansi.app`;
+  return `995${digits}@sms.payments.app`;
 }

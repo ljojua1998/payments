@@ -10,7 +10,7 @@ const defaultUrl = process.env.VERCEL_URL
 
 export const metadata: Metadata = {
   metadataBase: new URL(defaultUrl),
-  title: "ბალანსი — გადახდების შედარება",
+  title: "Payments",
   description:
     "საბანკო ტრანზაქციების შედარება ხელშეკრულებებთან — ვინ გადაიხადა და ვინ არა",
 };
