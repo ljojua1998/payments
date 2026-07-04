@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { toE164 } from "@/lib/auth/phone";
+import { toAuthEmail } from "@/lib/auth/phone";
 import { fieldErrors, loginSchema } from "@/lib/schemas/auth";
 import { Button } from "@/components/ui/button";
 import { AuthCard, AuthError } from "@/components/auth/auth-card";
@@ -34,7 +34,7 @@ export function LoginForm() {
 
     const supabase = createClient();
     const { error } = await supabase.auth.signInWithPassword({
-      phone: toE164(parsed.data.phone),
+      email: toAuthEmail(parsed.data.phone),
       password: parsed.data.password,
     });
 

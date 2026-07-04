@@ -4,8 +4,9 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
-import { toE164 } from "@/lib/auth/phone";
+import { toAuthEmail } from "@/lib/auth/phone";
 import { fieldErrors, signUpSchema } from "@/lib/schemas/auth";
+import { startRegistration, verifyRegistration } from "@/lib/services/auth-api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AuthCard, AuthError } from "@/components/auth/auth-card";
@@ -42,38 +43,39 @@ export function SignUpForm() {
     setErrors({});
     setIsLoading(true);
 
-    const supabase = createClient();
-    const { error } = await supabase.auth.signUp({
-      phone: toE164(parsed.data.phone),
-      password: parsed.data.password,
-      options: {
-        data: { full_name: parsed.data.fullName },
-      },
-    });
-
+    const { error } = await startRegistration(parsed.data.phone);
     setIsLoading(false);
 
     if (error) {
-      setAuthError(
-        error.message.includes("already registered")
-          ? "ეს ნომერი უკვე რეგისტრირებულია — სცადეთ შესვლა"
-          : "რეგისტრაცია ვერ მოხერხდა — სცადეთ თავიდან",
-      );
+      setAuthError(error);
       return;
     }
-
     setStep("verify");
   };
 
-  const handleResend = async () => {
-    const supabase = createClient();
-    const { error } = await supabase.auth.resend({
-      type: "sms",
-      phone: toE164(phone),
+  const handleVerify = async (code: string) => {
+    const { error } = await verifyRegistration({
+      phone,
+      code,
+      fullName: fullName.trim(),
+      password,
     });
-    return {
-      error: error ? "კოდის გაგზავნა ვერ მოხერხდა — სცადეთ მოგვიანებით" : null,
-    };
+    if (error) {
+      return { error };
+    }
+
+    const supabase = createClient();
+    const { error: loginError } = await supabase.auth.signInWithPassword({
+      email: toAuthEmail(phone),
+      password,
+    });
+    if (loginError) {
+      return { error: "ანგარიში შეიქმნა — შედით ლოგინის გვერდიდან" };
+    }
+
+    router.push("/");
+    router.refresh();
+    return { error: null };
   };
 
   if (step === "verify") {
@@ -81,11 +83,8 @@ export function SignUpForm() {
       <OtpVerifyStep
         phone={phone}
         title="ნომრის დადასტურება"
-        onVerified={() => {
-          router.push("/");
-          router.refresh();
-        }}
-        onResend={handleResend}
+        onVerify={handleVerify}
+        onResend={() => startRegistration(phone)}
         onBack={() => setStep("details")}
       />
     );

@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
-import { formatPhoneDisplay, toE164 } from "@/lib/auth/phone";
+import { formatPhoneDisplay } from "@/lib/auth/phone";
 import { otpCodeSchema } from "@/lib/schemas/auth";
 import { Button } from "@/components/ui/button";
 import { AuthCard, AuthError } from "@/components/auth/auth-card";
@@ -13,17 +12,21 @@ const RESEND_COOLDOWN_SECONDS = 60;
 type OtpVerifyStepProps = {
   phone: string;
   title: string;
-  onVerified: () => void;
+  submitLabel?: string;
+  onVerify: (code: string) => Promise<{ error: string | null }>;
   onResend: () => Promise<{ error: string | null }>;
   onBack: () => void;
+  children?: React.ReactNode;
 };
 
 export function OtpVerifyStep({
   phone,
   title,
-  onVerified,
+  submitLabel = "დადასტურება",
+  onVerify,
   onResend,
   onBack,
+  children,
 }: OtpVerifyStepProps) {
   const [code, setCode] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -47,20 +50,11 @@ export function OtpVerifyStep({
     }
     setIsLoading(true);
 
-    const supabase = createClient();
-    const { error: verifyError } = await supabase.auth.verifyOtp({
-      phone: toE164(phone),
-      token: parsed.data,
-      type: "sms",
-    });
-
+    const { error: verifyError } = await onVerify(parsed.data);
     if (verifyError) {
-      setError("კოდი არასწორია ან ვადა გაუვიდა — სცადეთ თავიდან");
+      setError(verifyError);
       setIsLoading(false);
-      return;
     }
-
-    onVerified();
   };
 
   const handleResend = async () => {
@@ -84,13 +78,15 @@ export function OtpVerifyStep({
 
         <OtpInput value={code} onChange={setCode} invalid={Boolean(error)} />
 
+        {children}
+
         <Button
           type="submit"
           size="lg"
           className="h-11"
           disabled={isLoading || code.length < 6}
         >
-          {isLoading ? "მოწმდება..." : "დადასტურება"}
+          {isLoading ? "მოწმდება..." : submitLabel}
         </Button>
 
         <div className="flex items-center justify-between text-sm">

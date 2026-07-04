@@ -6,7 +6,7 @@
 
 ## ტექნოლოგიები
 
-Next.js (App Router) · TypeScript · Supabase (Database + Phone Auth) · Tailwind CSS · TanStack Query · Zod
+Next.js (App Router) · TypeScript · Supabase (Database + Auth) · Tailwind CSS · TanStack Query · Zod · ubill.dev (SMS OTP)
 
 ## გაშვება ლოკალურად
 
@@ -31,7 +31,7 @@ Next.js (App Router) · TypeScript · Supabase (Database + Phone Auth) · Tailwi
    npm run dev
    ```
 
-ავტორიზაცია ტელეფონის ნომრით მუშაობს — რეგისტრაციისთვის საჭიროა SMS პროვაიდერი ან სატესტო ნომრები (იხ. `supabase/README.md`).
+ავტორიზაცია ტელეფონის ნომრით მუშაობს — OTP კოდები საკუთარი SMS პროვაიდერით (ubill.dev) იგზავნება, სესიებს კი Supabase Auth მართავს (იხ. `supabase/README.md`).
 
 ## სად დევს matching logic და რატომ
 
