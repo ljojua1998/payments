@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { LogoutButton } from "@/components/logout-button";
 import { ThemeSwitcher } from "@/components/theme-switcher";
+import { Dashboard } from "@/components/dashboard/dashboard";
 
 async function UserMenu() {
   const supabase = await createClient();
@@ -46,14 +47,14 @@ export default function Home() {
         </div>
       </header>
 
-      <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col items-center justify-center gap-3 px-5 py-16 text-center">
-        <h1 className="font-display text-2xl font-semibold">
-          დეშბორდი მზადდება
-        </h1>
-        <p className="max-w-md text-sm leading-relaxed text-muted-foreground">
-          აქ გამოჩნდება გადახდების შედარების დეშბორდი — ტრანზაქციები,
-          სტატისტიკა და მოსალოდნელი vs ფაქტობრივი შეჯამება.
-        </p>
+      <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-5 sm:py-8">
+        <Suspense
+          fallback={
+            <div className="h-64 animate-pulse rounded-xl border border-border bg-card" />
+          }
+        >
+          <Dashboard />
+        </Suspense>
       </main>
     </div>
   );
