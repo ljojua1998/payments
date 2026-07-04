@@ -11,6 +11,7 @@ import { useRunMatching } from "@/lib/hooks/use-dashboard-mutations";
 import { Button } from "@/components/ui/button";
 import { PeriodPicker } from "@/components/dashboard/period-picker";
 import { StatsBar, computeMonthStats } from "@/components/dashboard/stats-bar";
+import { MatchRateChart } from "@/components/dashboard/match-rate-chart";
 import { TransactionsSection } from "@/components/dashboard/transactions-section";
 import { ExpectedVsActual } from "@/components/dashboard/expected-vs-actual";
 
@@ -115,6 +116,8 @@ export function Dashboard() {
       </div>
 
       <StatsBar stats={stats} isLoading={transactionsQuery.isPending} />
+
+      <MatchRateChart />
 
       <div className="grid items-start gap-5 xl:grid-cols-3">
         <TransactionsSection

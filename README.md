@@ -6,7 +6,23 @@
 
 ## ტექნოლოგიები
 
-Next.js (App Router) · TypeScript · Supabase (Database + Auth) · Tailwind CSS · TanStack Query · Zod · ubill.dev (SMS OTP)
+Next.js (App Router) · TypeScript · Supabase (Database + Auth + Storage) · Tailwind CSS · TanStack Query · Zod · Vitest · Groq (AI) · ubill.dev (SMS OTP)
+
+## ერთი შეხედვით
+
+```
+        საბანკო API / CSV იმპორტი                 ხელშეკრულებები (ბუღალტერი ავსებს)
+                  │                                            │
+                  ▼                                            ▼
+          bank_transactions  ──ს/კ მატჩინგი (RPC)──►  companies + contracts
+                  │                                            │
+                  └──────────────► დეშბორდი ◄──────────────────┘
+                       სტატისტიკა · ცხრილი · მოსალოდნელი vs ფაქტობრივი · ჩარტი
+                                          │
+                                    Payments AI (Groq)
+```
+
+მონაცემის ორი წყარო ერთდება ს/კ-ით: რა **უნდა** გადაეხადათ (ხელშეკრულებები) vs რა **გადაიხადეს** (ბანკი).
 
 ## გაშვება ლოკალურად
 
@@ -28,10 +44,14 @@ Next.js (App Router) · TypeScript · Supabase (Database + Auth) · Tailwind CSS
 4. გაუშვით:
 
    ```bash
-   npm run dev
+   npm run dev      # დეველოპმენტი
+   npm test         # ლოგიკის unit ტესტები (Vitest)
+   npm run build    # პროდაქშენ build
    ```
 
 ავტორიზაცია ტელეფონის ნომრით მუშაობს — OTP კოდები საკუთარი SMS პროვაიდერით (ubill.dev) იგზავნება, სესიებს კი Supabase Auth მართავს (იხ. `supabase/README.md`).
+
+> **შემფასებლისთვის:** ავტორიზაცია რეალურ SMS-ს იყენებს — რეგისტრაციისას შეყვანილ ნომერზე კოდი ცოცხლად მიდის ubill.dev-იდან. ტესტ-რეჟიმისთვის (SMS-ის გარეშე) შესაძლებელია Supabase-ში მომხმარებლის პირდაპირ შექმნა Admin API-თ — იხ. `supabase/README.md`.
 
 ## სად დევს matching logic და რატომ
 
@@ -61,21 +81,44 @@ WHERE bt.sender_inn = c.tax_id AND bt.status = 'unmatched';
 
 ```
 lib/
-  schemas/      Zod სქემები — auth ფორმები, დეშბორდის ფილტრები (URL პარამეტრები)
-  services/     typed service layer — ყველა Supabase წვდომა აქ გადის
+  schemas/      Zod სქემები — auth, დეშბორდის ფილტრები (URL), იმპორტი, პროფილი
+  services/     typed service layer — ყველა Supabase/Groq წვდომა აქ გადის
   hooks/        TanStack Query hooks — queries, mutations, URL ფილტრები
+  server/       სერვერული ლოგიკა — OTP, SMS, Groq, AI კონტექსტი
   queries/      query key factory
+  *.test.ts     Vitest unit ტესტები (format, csv, payment-schedule)
 components/
-  auth/         ტელეფონით რეგისტრაცია/შესვლა/აღდგენა SMS OTP-ით
-  dashboard/    სტატისტიკა, ტრანზაქციების ცხრილი, თვეების ნავიგაცია, შეჯამება
+  auth/         ტელეფონით რეგისტრაცია/შესვლა/აღდგენა SMS OTP-ით (მოდალში)
+  dashboard/    სტატისტიკა, ჩარტი, ცხრილი, თვის ნავიგაცია, მოსალოდნელი vs ფაქტობრივი
+  companies/    კომპანიების CRUD, ხელშეკრულებები, გადახდების განრიგი
+  import/       CSV/ხელით იმპორტი
+  documents/    PDF ატვირთვა + AI ანალიზი
+  assistant/    Payments AI ჩატი
+  settings/ · activity/ · shell/ · ui/
+app/
+  (app)/        დაცული გვერდები (sidebar shell)
+  api/          route handlers — OTP auth, document analyze, AI assistant
 supabase/
-  migrations/   სქემა, seed მონაცემები, RLS პოლისები, RPC ფუნქციები
+  migrations/   სქემა, seed, RLS პოლისები, RPC ფუნქციები (12 ფაილი)
 ```
+
+## ტესტები
+
+```bash
+npm test
+```
+
+Vitest ფარავს კრიტიკულ სუფთა ლოგიკას DB-ს გარეშე:
+
+- **`lib/payment-schedule.test.ts`** — გადახდის დღის მედიანა, „აქტიური ხელშეკრულება თვეში", paid/overdue/upcoming სტატუსები
+- **`lib/csv.test.ts`** — CSV პარსერი (ბრჭყალები, `;`, BOM) და იმპორტის Zod ვალიდაცია
+- **`lib/format.test.ts`** — ლარის და ქართული თარიღების ფორმატირება (locale-დამოუკიდებელი)
 
 - **მდგომარეობა URL-შია** (`?month=2026-06&status=unmatched&q=...`) — Zod-ით ვალიდირდება, ლინკი გაზიარებადია, back/forward მუშაობს
 - **თვეზე ერთი query** — სტატისტიკა, ფილტრები და სორტირება 89 რიგზე კლიენტზე გამოითვლება; mutations ინვალიდაციას თვის key-ზე აკეთებს
 - **Optimistic updates** — ხელით მიბმა/იგნორირება მყისიერად აისახება, შეცდომისას rollback
-- **RLS** — მონაცემები მხოლოდ ავტორიზებული მომხმარებლისთვის; RPC ფუნქციები `anon` როლისთვის დახურულია
+- **RLS** — მონაცემები მხოლოდ ავტორიზებული მომხმარებლისთვის; RPC ფუნქციები `anon` როლისთვის დახურულია; დოკუმენტები, ავატარები და პროფილები owner-only (მომხმარებელი მხოლოდ თავისას ხედავს)
+- **ჩარტი** — მატჩინგის დინამიკა (დამთხვეული/შეუსაბამო თანხა + match rate) inline SVG-ით, ბიბლიოთეკის გარეშე, თემა-მგრძნობიარე
 
 ## ბონუს ფუნქციები
 
