@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
+  BarChart3,
   Building2,
   FileText,
   History,
@@ -16,6 +17,7 @@ const NAV_ITEMS = [
   { href: "/companies", label: "კომპანიები", icon: Building2 },
   { href: "/import", label: "იმპორტი", icon: Upload },
   { href: "/documents", label: "დოკუმენტები", icon: FileText },
+  { href: "/analytics", label: "ანალიტიკა", icon: BarChart3 },
   { href: "/activity", label: "ისტორია", icon: History },
 ];
 
@@ -55,7 +57,7 @@ export function BottomNav() {
       aria-label="მთავარი ნავიგაცია"
       className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card pb-[env(safe-area-inset-bottom)] lg:hidden"
     >
-      <div className="grid grid-cols-5">
+      <div className="grid grid-cols-6">
         {NAV_ITEMS.map((item) => {
           const isActive = pathname === item.href;
           return (
