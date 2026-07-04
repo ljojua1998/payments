@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { PaymentsLogo } from "@/components/logo";
+import { AssistantWidget } from "@/components/assistant/assistant-widget";
 import { BottomNav, SidebarNav } from "@/components/shell/nav-links";
 import { UserMenu } from "@/components/shell/user-menu";
 
@@ -43,6 +44,7 @@ export default function AppLayout({
       </div>
 
       <BottomNav />
+      <AssistantWidget />
     </div>
   );
 }
