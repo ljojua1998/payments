@@ -36,9 +36,9 @@ SUPABASE_SECRET_KEY=<secret-key>
 SMS_PROVIDER_API_KEY=<ubill-api-key>
 SMS_BRAND_ID=<ubill-brand-id>
 
-ANTHROPIC_API_KEY=<anthropic-api-key>
+GROQ_API_KEY=<groq-api-key>
 ```
 
-`ANTHROPIC_API_KEY` საჭიროა PDF დოკუმენტების AI ანალიზისთვის (Claude API) — მის გარეშე ატვირთვა მუშაობს, ანალიზის ღილაკი კი შესაბამის შეტყობინებას აჩვენებს.
+`GROQ_API_KEY` საჭიროა PDF დოკუმენტების AI ანალიზისთვის — გასაღები უფასოდ იქმნება console.groq.com-ზე. სერვერი PDF-დან ტექსტს ამოიღებს და Groq-ის მოდელს (default: `llama-3.3-70b-versatile`, იცვლება `GROQ_MODEL` ცვლადით) გაუგზავნის. გასაღების გარეშე ატვირთვა მუშაობს, ანალიზის ღილაკი კი შესაბამის შეტყობინებას აჩვენებს.
 
 Supabase მნიშვნელობები: Dashboard → Project Settings → API Keys. `SUPABASE_SECRET_KEY` მხოლოდ სერვერზე გამოიყენება (OTP ვერიფიკაცია, მომხმარებლის შექმნა) და კლიენტში არასდროს ხვდება.

@@ -1,22 +1,25 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import Anthropic from "@anthropic-ai/sdk";
+import { extractText, getDocumentProxy } from "unpdf";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/server/admin";
+import { groqChat, isGroqConfigured } from "@/lib/server/groq";
 import type { DocumentRecord } from "@/lib/types";
 
 const requestSchema = z.object({
   documentId: z.string().uuid(),
 });
 
-const ANALYSIS_PROMPT = `შენ ხარ "Payments" — გადახდების შედარების სისტემის ასისტენტი. გააანალიზე მიმაგრებული დოკუმენტი და ქართულად, მოკლედ და სტრუქტურირებულად შეაჯამე:
+const MAX_TEXT_CHARS = 12000;
 
-- რა ტიპის დოკუმენტია (ინვოისი, ამონაწერი, ხელშეკრულება, სხვა)
+const ANALYSIS_PROMPT = `შენ ხარ "Payments" — გადახდების შედარების სისტემის ასისტენტი. მომხმარებელი გატვირთავს დოკუმენტის ტექსტს. გააანალიზე და ქართულად, მოკლედ და სტრუქტურირებულად შეაჯამე:
+
+- რა ტიპის დოკუმენტია (ინვოისი, საბანკო ამონაწერი, ხელშეკრულება, სხვა)
 - ვინ არიან მხარეები — გამგზავნი/მიმღები, საიდენტიფიკაციო კოდები თუ ჩანს
 - რა თანხები, ვალუტა და თარიღები ფიგურირებს
 - როგორ შეიძლება უკავშირდებოდეს საბანკო გადახდებს ან ხელშეკრულებებს
 
-პასუხი მხოლოდ ქართულად, ზედმეტი შესავლის გარეშე.`;
+უპასუხე მხოლოდ ქართულად, ზედმეტი შესავლის გარეშე.`;
 
 export async function POST(request: Request) {
   const supabase = await createClient();
@@ -31,9 +34,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "არასწორი მოთხოვნა" }, { status: 400 });
   }
 
-  if (!process.env.ANTHROPIC_API_KEY) {
+  if (!isGroqConfigured()) {
     return NextResponse.json(
-      { error: "AI ანალიზი ჯერ არ არის კონფიგურირებული — საჭიროა ANTHROPIC_API_KEY" },
+      { error: "AI ანალიზი ჯერ არ არის კონფიგურირებული — საჭიროა GROQ_API_KEY" },
       { status: 503 },
     );
   }
@@ -66,40 +69,25 @@ export async function POST(request: Request) {
       throw new Error("ფაილის წაკითხვა ვერ მოხერხდა");
     }
 
-    const pdfBase64 = Buffer.from(await file.arrayBuffer()).toString("base64");
+    const pdf = await getDocumentProxy(new Uint8Array(await file.arrayBuffer()));
+    const { text } = await extractText(pdf, { mergePages: true });
+    const documentText = text.trim();
 
-    const anthropic = new Anthropic();
-    const stream = anthropic.messages.stream({
-      model: "claude-opus-4-8",
-      max_tokens: 2048,
-      messages: [
-        {
-          role: "user",
-          content: [
-            {
-              type: "document",
-              source: {
-                type: "base64",
-                media_type: "application/pdf",
-                data: pdfBase64,
-              },
-            },
-            { type: "text", text: ANALYSIS_PROMPT },
-          ],
-        },
-      ],
-    });
-    const message = await stream.finalMessage();
-
-    const summary = message.content
-      .filter((block) => block.type === "text")
-      .map((block) => block.text)
-      .join("\n")
-      .trim();
-
-    if (!summary) {
-      throw new Error("ანალიზმა ცარიელი პასუხი დააბრუნა");
+    if (!documentText) {
+      await admin
+        .from("documents")
+        .update({ status: "error" })
+        .eq("id", document.id);
+      return NextResponse.json(
+        { error: "PDF-დან ტექსტი ვერ ამოიკითხა — სავარაუდოდ დასკანერებული სურათია" },
+        { status: 422 },
+      );
     }
+
+    const summary = await groqChat(
+      ANALYSIS_PROMPT,
+      documentText.slice(0, MAX_TEXT_CHARS),
+    );
 
     await admin
       .from("documents")
