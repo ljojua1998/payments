@@ -1,14 +1,14 @@
 "use client";
 
-import { useState } from "react";
-import { CalendarDays, ChevronDown } from "lucide-react";
+import { useEffect, useState } from "react";
+import { CalendarDays, ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   GEORGIAN_MONTHS_SHORT,
   formatMonthLabel,
   getMonthRange,
 } from "@/lib/format";
-import { AVAILABLE_MONTHS, type MonthKey } from "@/lib/schemas/dashboard";
+import { type MonthKey } from "@/lib/schemas/dashboard";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -16,8 +16,11 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
-const YEAR = 2026;
 const WEEKDAYS = ["ორშ", "სამ", "ოთხ", "ხუთ", "პარ", "შაბ", "კვი"];
+const CURRENT_MONTH_KEY = (() => {
+  const now = new Date();
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+})();
 
 type PeriodPickerProps = {
   month: MonthKey;
@@ -27,10 +30,14 @@ type PeriodPickerProps = {
 
 export function PeriodPicker({ month, day, onChange }: PeriodPickerProps) {
   const [open, setOpen] = useState(false);
+  const [viewYear, setViewYear] = useState(() => Number(month.slice(0, 4)));
+
+  useEffect(() => {
+    if (open) setViewYear(Number(month.slice(0, 4)));
+  }, [open, month]);
 
   const daysInMonth = Number(getMonthRange(month).end.slice(-2));
-  const firstWeekday =
-    (new Date(`${month}-01T00:00:00`).getDay() + 6) % 7;
+  const firstWeekday = (new Date(`${month}-01T00:00:00`).getDay() + 6) % 7;
 
   const label = day
     ? `${day} ${formatMonthLabel(month)}`
@@ -46,28 +53,43 @@ export function PeriodPicker({ month, day, onChange }: PeriodPickerProps) {
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[19rem]">
-        <p className="px-1 pb-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">
-          თვე · {YEAR}
-        </p>
+        <div className="flex items-center justify-between px-1 pb-2">
+          <button
+            onClick={() => setViewYear((y) => y - 1)}
+            aria-label="წინა წელი"
+            className="flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          >
+            <ChevronLeft size={15} />
+          </button>
+          <span className="text-xs font-semibold uppercase tracking-wide tabular-nums text-muted-foreground">
+            თვე · {viewYear}
+          </span>
+          <button
+            onClick={() => setViewYear((y) => y + 1)}
+            aria-label="შემდეგი წელი"
+            disabled={viewYear >= Number(CURRENT_MONTH_KEY.slice(0, 4))}
+            className="flex h-6 w-6 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-30"
+          >
+            <ChevronRight size={15} />
+          </button>
+        </div>
         <div className="grid grid-cols-4 gap-1.5">
           {Array.from({ length: 12 }, (_, index) => {
-            const monthKey = `${YEAR}-${String(index + 1).padStart(2, "0")}`;
-            const isAvailable = (
-              AVAILABLE_MONTHS as readonly string[]
-            ).includes(monthKey);
+            const monthKey = `${viewYear}-${String(index + 1).padStart(2, "0")}`;
+            const isFuture = monthKey > CURRENT_MONTH_KEY;
             const isSelected = monthKey === month;
             return (
               <button
                 key={monthKey}
-                disabled={!isAvailable}
-                onClick={() => onChange(monthKey as MonthKey, undefined)}
+                disabled={isFuture}
+                onClick={() => onChange(monthKey, undefined)}
                 className={cn(
                   "rounded-md py-1.5 text-sm font-medium transition-colors",
                   isSelected
                     ? "bg-primary text-primary-foreground"
-                    : isAvailable
-                      ? "hover:bg-muted"
-                      : "cursor-not-allowed text-muted-foreground/40",
+                    : isFuture
+                      ? "cursor-not-allowed text-muted-foreground/40"
+                      : "hover:bg-muted",
                 )}
               >
                 {GEORGIAN_MONTHS_SHORT[index]}

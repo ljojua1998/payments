@@ -1,13 +1,16 @@
 import { z } from "zod";
 
-export const AVAILABLE_MONTHS = ["2026-04", "2026-05", "2026-06"] as const;
+// დეშბორდის თვის ფორმატი: YYYY-MM. მონაცემები დინამიურია — ნებისმიერი
+// თვე მუშაობს (იმპორტით დამატებული ივლისი, აგვისტო და ა.შ.).
+export const DEFAULT_MONTH = "2026-06";
 
-export type MonthKey = (typeof AVAILABLE_MONTHS)[number];
-
-export const DEFAULT_MONTH: MonthKey = "2026-06";
+export type MonthKey = string;
 
 export const dashboardFiltersSchema = z.object({
-  month: z.enum(AVAILABLE_MONTHS).catch(DEFAULT_MONTH),
+  month: z
+    .string()
+    .regex(/^\d{4}-\d{2}$/)
+    .catch(DEFAULT_MONTH),
   day: z.coerce.number().int().min(1).max(31).optional().catch(undefined),
   status: z.enum(["all", "matched", "unmatched", "ignored"]).catch("all"),
   q: z.string().trim().max(100).catch(""),

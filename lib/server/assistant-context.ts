@@ -1,9 +1,10 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { AVAILABLE_MONTHS } from "@/lib/schemas/dashboard";
 import type {
   CompanyMonthlySummary,
   CompanyWithContracts,
 } from "@/lib/types";
+
+const MAX_SUMMARY_MONTHS = 6;
 
 type SlimTransaction = {
   entry_date: string;
@@ -32,7 +33,7 @@ function shortDate(isoDate: string): string {
 export async function buildAssistantContext(
   admin: SupabaseClient,
 ): Promise<string> {
-  const [companiesRes, transactionsRes, ...summaryRes] = await Promise.all([
+  const [companiesRes, transactionsRes] = await Promise.all([
     admin
       .from("companies")
       .select(
@@ -45,14 +46,21 @@ export async function buildAssistantContext(
         "entry_date, sender_name, sender_inn, amount, status, matched_company:companies(name)",
       )
       .order("entry_date"),
-    ...AVAILABLE_MONTHS.map((month) =>
-      admin.rpc("monthly_company_summary", { target_month: `${month}-01` }),
-    ),
   ]);
 
   const companies = (companiesRes.data ?? []) as CompanyWithContracts[];
   const transactions = (transactionsRes.data ??
     []) as unknown as SlimTransaction[];
+
+  // თვეები დინამიურად მონაცემებიდან (ბოლო რამდენიმე), არა ჩაბზარული სიიდან
+  const months = [...new Set(transactions.map((t) => t.entry_date.slice(0, 7)))]
+    .sort()
+    .slice(-MAX_SUMMARY_MONTHS);
+  const summaryRes = await Promise.all(
+    months.map((month) =>
+      admin.rpc("monthly_company_summary", { target_month: `${month}-01` }),
+    ),
+  );
 
   const statusMark = { active: "აქტ", paused: "შეჩ", ended: "დასრ" } as const;
   const companiesBlock = companies
@@ -69,7 +77,7 @@ export async function buildAssistantContext(
     })
     .join("\n");
 
-  const summariesBlock = AVAILABLE_MONTHS.map((month, index) => {
+  const summariesBlock = months.map((month, index) => {
     const rows = (summaryRes[index]?.data ?? []) as CompanyMonthlySummary[];
     const line = rows
       .map(
