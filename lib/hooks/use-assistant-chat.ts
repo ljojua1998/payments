@@ -3,7 +3,8 @@
 import { useCallback, useRef, useState } from "react";
 import type { ChatMessage } from "@/lib/schemas/assistant";
 
-const HISTORY_LIMIT = 8;
+const HISTORY_LIMIT = 6;
+const IDLE_TIMEOUT_MS = 25_000;
 
 export function useAssistantChat() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -28,12 +29,22 @@ export function useAssistantChat() {
       const controller = new AbortController();
       abortRef.current = controller;
 
+      // Idle watchdog — თუ პასუხი გაიჭედა (გათიშული stream, rate-limit),
+      // აბორტდება და input აღარ ირჩება მუდმივად.
+      let idleTimer: ReturnType<typeof setTimeout> | undefined;
+      let receivedAny = false;
+      const armWatchdog = () => {
+        clearTimeout(idleTimer);
+        idleTimer = setTimeout(() => controller.abort(), IDLE_TIMEOUT_MS);
+      };
+
       const history: ChatMessage[] = [
         ...messages,
         { role: "user", content: question },
       ];
       setMessages([...history, { role: "assistant", content: "" }]);
       setIsStreaming(true);
+      armWatchdog();
 
       try {
         const response = await fetch("/api/assistant", {
@@ -56,13 +67,20 @@ export function useAssistantChat() {
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
+          receivedAny = true;
+          armWatchdog();
           appendToLast(decoder.decode(value, { stream: true }));
         }
       } catch (error) {
-        if (!(error instanceof DOMException && error.name === "AbortError")) {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          if (!receivedAny) {
+            appendToLast("პასუხი დაგვიანდა — სცადეთ თავიდან ცოტა ხანში");
+          }
+        } else {
           appendToLast("კავშირი გაწყდა — სცადეთ თავიდან");
         }
       } finally {
+        clearTimeout(idleTimer);
         setIsStreaming(false);
       }
     },

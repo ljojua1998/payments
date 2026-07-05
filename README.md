@@ -1,5 +1,7 @@
 # Payments — გადახდების შედარების (Reconciliation) დეშბორდი
 
+[![CI](https://github.com/ljojua1998/payments/actions/workflows/ci.yml/badge.svg)](https://github.com/ljojua1998/payments/actions/workflows/ci.yml)
+
 ინსტრუმენტი კომპანიისთვის, რომელიც მართავს მომსახურების ხელშეკრულებებს.
 საბანკო ტრანზაქციები ყოველდღიურად შემოდის საქართველოს ბანკის API-დან და
 საჭიროა მათი შესაბამისობაში მოყვანა არსებულ ხელშეკრულებებთან — **ვინ გადაიხადა,

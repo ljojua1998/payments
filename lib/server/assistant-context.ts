@@ -82,6 +82,7 @@ export async function buildAssistantContext(
 
   const unmatched = transactions.filter((t) => t.status === "unmatched");
   const unmatchedBlock = unmatched
+    .slice(0, 8)
     .map(
       (t) =>
         `${shortDate(t.entry_date)}|${t.sender_name ?? "?"}|${t.sender_inn ?? "?"}|${Number(t.amount)}`,
@@ -103,7 +104,7 @@ ${companiesBlock}
 ## თვიური შეჯამება
 ${summariesBlock}
 
-## შეუსაბამო გადარიცხვები — უცნობი გამგზავნები, არავის მიბმია (თარიღი|გამგზავნი|ს/კ|თანხა) — სულ ${unmatched.length}
+## შეუსაბამო გადარიცხვები — უცნობი გამგზავნები, არავის მიბმია (თარიღი|გამგზავნი|ს/კ|თანხა) — სულ ${unmatched.length}${unmatched.length > 8 ? " (ქვემოთ პირველი 8)" : ""}
 ${unmatchedBlock || "არაა"}
 
 იგნორირებული: ${ignoredCount}`;

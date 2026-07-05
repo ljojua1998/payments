@@ -25,7 +25,7 @@ export function AssistantWidget() {
               <div className="leading-tight">
                 <p className="text-sm font-semibold text-white">Payments AI</p>
                 <p className="text-[11px] text-white/60">
-                  პასუხობს ცოცხალი მონაცემებით
+                  პასუხები მონაცემების ანალიზის შედეგად
                 </p>
               </div>
             </div>
