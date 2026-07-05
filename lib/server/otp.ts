@@ -62,20 +62,25 @@ export async function issueOtp(
     Date.now() + OTP_TTL_MINUTES * 60 * 1000,
   ).toISOString();
 
-  const { error: insertError } = await admin.from("phone_otps").insert({
-    phone,
-    purpose,
-    code_hash: hashCode(phone, code),
-    expires_at: expiresAt,
-  });
+  const { data: inserted, error: insertError } = await admin
+    .from("phone_otps")
+    .insert({
+      phone,
+      purpose,
+      code_hash: hashCode(phone, code),
+      expires_at: expiresAt,
+    })
+    .select("id")
+    .single();
 
-  if (insertError) {
+  if (insertError || !inserted) {
     return { ok: false, error: "დროებითი შეფერხება — სცადეთ თავიდან", status: 500 };
   }
 
   try {
     await sendSms(phone, otpSmsText(code, host));
   } catch {
+    await admin.from("phone_otps").delete().eq("id", inserted.id);
     return {
       ok: false,
       error: "SMS-ის გაგზავნა ვერ მოხერხდა — სცადეთ მოგვიანებით",

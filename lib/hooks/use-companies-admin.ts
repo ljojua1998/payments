@@ -34,6 +34,7 @@ function useInvalidateReconciliation() {
     queryClient.invalidateQueries({ queryKey: queryKeys.companies });
     queryClient.invalidateQueries({ queryKey: queryKeys.allTransactions });
     queryClient.invalidateQueries({ queryKey: queryKeys.allSummaries });
+    queryClient.invalidateQueries({ queryKey: ["payments", "matched"] });
   };
 }
 
@@ -66,7 +67,6 @@ export function useMatchedPayments() {
 
 export function useDeleteCompany() {
   const supabase = useMemo(() => createClient(), []);
-  const queryClient = useQueryClient();
   const invalidate = useInvalidateReconciliation();
 
   return useMutation({
@@ -78,10 +78,7 @@ export function useDeleteCompany() {
         `წაშალა კომპანია „${variables.name}"`,
       );
     },
-    onSuccess: () => {
-      invalidate();
-      queryClient.invalidateQueries({ queryKey: ["payments", "matched"] });
-    },
+    onSuccess: invalidate,
   });
 }
 

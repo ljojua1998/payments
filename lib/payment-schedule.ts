@@ -69,7 +69,7 @@ export function buildSchedule(
 ): ScheduleRow[] {
   const todayIso = today.toISOString().slice(0, 10);
   const monthPrefix = todayIso.slice(0, 7);
-  const todayDay = today.getDate();
+  const todayDay = Number(todayIso.slice(8, 10));
   const paymentsByCompany = groupPaymentsByCompany(payments);
 
   const rows: ScheduleRow[] = [];

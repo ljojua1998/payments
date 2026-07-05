@@ -16,6 +16,7 @@ export function useDashboardFilters() {
     () =>
       dashboardFiltersSchema.parse({
         month: searchParams.get("month") ?? undefined,
+        day: searchParams.get("day") ?? undefined,
         status: searchParams.get("status") ?? undefined,
         q: searchParams.get("q") ?? undefined,
         sort: searchParams.get("sort") ?? undefined,
