@@ -1,10 +1,16 @@
-import { Check } from "lucide-react";
+import { Check, FileText, Landmark, Wand2 } from "lucide-react";
 import { PaymentsLogo } from "@/components/logo";
 
 const LEDGER_ROWS = [
-  { sender: "შპს გეოტრანსი", amount: "1 500,00 ₾", delay: "0s" },
-  { sender: "სს კავკას ექსპრესი", amount: "3 100,00 ₾", delay: "1.4s" },
-  { sender: "შპს ეკო ტრანსპორტი", amount: "750,00 ₾", delay: "2.8s" },
+  { account: "GE•• BG •••• •• 1893", delay: "0s" },
+  { account: "GE•• BG •••• •• 6729", delay: "1.4s" },
+  { account: "GE•• BG •••• •• 9365", delay: "2.8s" },
+];
+
+const FEATURES = [
+  { icon: Landmark, text: "საბანკო ინტეგრაცია" },
+  { icon: Wand2, text: "ავტომატური მატჩინგი" },
+  { icon: FileText, text: "AI დოკუმენტების ანალიზი" },
 ];
 
 export function BrandMark({ compact = false }: { compact?: boolean }) {
@@ -28,10 +34,19 @@ export function BrandPanel() {
   return (
     <aside className="relative hidden flex-col justify-between overflow-hidden bg-brand-deep p-10 lg:flex xl:p-14">
       <div
-        className="pointer-events-none absolute inset-0 opacity-40"
+        className="pointer-events-none absolute inset-0 opacity-50"
         style={{
           backgroundImage:
-            "radial-gradient(ellipse 80% 55% at 20% 0%, hsl(168 62% 25% / 0.5), transparent), radial-gradient(ellipse 60% 40% at 100% 100%, hsl(41 72% 56% / 0.12), transparent)",
+            "radial-gradient(ellipse 75% 55% at 15% -5%, hsl(224 76% 40% / 0.55), transparent), radial-gradient(ellipse 60% 45% at 100% 105%, hsl(221 85% 62% / 0.18), transparent)",
+        }}
+      />
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.04]"
+        style={{
+          backgroundImage:
+            "linear-gradient(hsl(0 0% 100%) 1px, transparent 1px), linear-gradient(90deg, hsl(0 0% 100%) 1px, transparent 1px)",
+          backgroundSize: "38px 38px",
+          maskImage: "radial-gradient(ellipse 90% 80% at 50% 30%, black, transparent)",
         }}
       />
 
@@ -39,25 +54,26 @@ export function BrandPanel() {
         <BrandMark />
       </div>
 
-      <div className="relative flex flex-col gap-10">
+      <div className="relative flex flex-col gap-9">
         <div className="flex flex-col gap-4">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gold">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary-foreground/60">
             გადახდების შედარების სისტემა
           </p>
           <h1 className="font-display text-4xl font-semibold leading-tight text-white xl:text-5xl">
-            ყველა გადარიცხვა თავის ადგილზეა
+            ყველა გადარიცხვა
+            <br />
+            თავის ადგილზე
           </h1>
-          <p className="max-w-md text-base leading-relaxed text-white/70">
-            საბანკო ტრანზაქციები ავტომატურად ემთხვევა ხელშეკრულებებს — ერთ
-            ეკრანზე ხედავთ ვინ გადაიხადა, ვინ დააკლო და ვინ საერთოდ არ
-            გამოჩენილა.
+          <p className="max-w-md text-base leading-relaxed text-white/65">
+            საბანკო ტრანზაქციები ავტომატურად ერგება ხელშეკრულებებს — ერთ ეკრანზე
+            ხედავთ ვინ გადაიხადა, ვინ დააკლო და ვინ არა.
           </p>
         </div>
 
         <div className="flex max-w-md flex-col gap-2.5">
           {LEDGER_ROWS.map((row) => (
             <div
-              key={row.sender}
+              key={row.account}
               className="ledger-row flex items-center justify-between rounded-lg border border-white/10 bg-white/[0.04] px-4 py-3 backdrop-blur-sm"
               style={{ "--delay": row.delay } as React.CSSProperties}
             >
@@ -74,10 +90,12 @@ export function BrandPanel() {
                     <Check size={12} strokeWidth={3} />
                   </span>
                 </span>
-                <span className="text-sm text-white/85">{row.sender}</span>
+                <span className="text-sm tabular-nums tracking-wide text-white/80">
+                  {row.account}
+                </span>
               </div>
-              <span className="text-sm font-medium tabular-nums text-white/85">
-                {row.amount}
+              <span className="text-xs font-medium text-white/45">
+                გადარიცხვა
               </span>
             </div>
           ))}
@@ -87,7 +105,9 @@ export function BrandPanel() {
               <span className="flex h-5 w-5 items-center justify-center">
                 <span className="h-2 w-2 rounded-full bg-red-400" />
               </span>
-              <span className="text-sm text-white/85">უცნობი გამგზავნი</span>
+              <span className="text-sm tabular-nums tracking-wide text-white/80">
+                GE•• BG •••• •• 0000
+              </span>
             </div>
             <span className="rounded-full bg-red-400/15 px-2.5 py-0.5 text-xs font-medium text-red-300">
               შეუსაბამო
@@ -96,9 +116,17 @@ export function BrandPanel() {
         </div>
       </div>
 
-      <p className="relative text-sm text-white/45">
-        89 ტრანზაქცია · 15 კომპანია · აპრილი–ივნისი 2026
-      </p>
+      <div className="relative flex flex-wrap gap-x-5 gap-y-2">
+        {FEATURES.map((feature) => (
+          <span
+            key={feature.text}
+            className="inline-flex items-center gap-2 text-sm text-white/55"
+          >
+            <feature.icon size={15} className="text-white/40" />
+            {feature.text}
+          </span>
+        ))}
+      </div>
     </aside>
   );
 }
