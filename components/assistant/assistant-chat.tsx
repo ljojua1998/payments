@@ -43,10 +43,10 @@ export function AssistantChat({
   };
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="flex min-h-0 flex-1 flex-col">
       <div
         ref={scrollRef}
-        className="flex-1 space-y-3 overflow-y-auto px-4 py-4"
+        className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 py-4"
       >
         {messages.length === 0 ? (
           <div className="flex h-full flex-col items-center justify-center gap-4 text-center">
@@ -104,7 +104,7 @@ export function AssistantChat({
 
       <form
         onSubmit={handleSubmit}
-        className="flex items-center gap-2 border-t border-border px-3 py-3"
+        className="flex shrink-0 items-center gap-2 border-t border-border bg-card px-3 py-3"
       >
         {messages.length > 0 && (
           <Button
