@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useMemo } from "react";
-import { Search, Sigma } from "lucide-react";
+import { Download, Search, Sigma } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { formatGel } from "@/lib/format";
+import { exportTransactionsCsv } from "@/lib/export-transactions";
 import { useCompanies } from "@/lib/hooks/use-dashboard-data";
 import { useTransactionAction } from "@/lib/hooks/use-dashboard-mutations";
 import type { BankTransaction, Company } from "@/lib/types";
@@ -135,7 +136,21 @@ export function TransactionsSection({
     <section className="rounded-xl border border-border bg-card xl:col-span-2">
       <div className="flex flex-col gap-3 border-b border-border px-4 py-3.5">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <h2 className="text-base font-semibold">ტრანზაქციები</h2>
+          <div className="flex items-center gap-2.5">
+            <h2 className="text-base font-semibold">ტრანზაქციები</h2>
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 gap-1.5"
+              disabled={visibleTransactions.length === 0}
+              onClick={() =>
+                exportTransactionsCsv(visibleTransactions, filters.month)
+              }
+            >
+              <Download size={14} />
+              CSV
+            </Button>
+          </div>
           <label className="relative w-full sm:w-64">
             <Search
               size={15}
