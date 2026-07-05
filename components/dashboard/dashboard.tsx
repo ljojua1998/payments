@@ -8,6 +8,7 @@ import {
   useTransactions,
 } from "@/lib/hooks/use-dashboard-data";
 import { useRunMatching } from "@/lib/hooks/use-dashboard-mutations";
+import { useAvailableMonths } from "@/lib/hooks/use-available-months";
 import { Button } from "@/components/ui/button";
 import { PeriodPicker } from "@/components/dashboard/period-picker";
 import { StatsBar, computeMonthStats } from "@/components/dashboard/stats-bar";
@@ -20,6 +21,7 @@ export function Dashboard() {
   const { filters, setFilters } = useDashboardFilters();
   const transactionsQuery = useTransactions(filters.month);
   const summaryQuery = useMonthlySummary(filters.month);
+  const availableMonthsQuery = useAvailableMonths();
   const matching = useRunMatching();
 
   const [searchInput, setSearchInput] = useState(filters.q);
@@ -101,6 +103,7 @@ export function Dashboard() {
           <PeriodPicker
             month={filters.month}
             day={filters.day}
+            availableMonths={availableMonthsQuery.data}
             onChange={(month, day) => setFilters({ month, day })}
           />
           <Button

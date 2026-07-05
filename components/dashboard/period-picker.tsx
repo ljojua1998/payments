@@ -25,12 +25,23 @@ const CURRENT_MONTH_KEY = (() => {
 type PeriodPickerProps = {
   month: MonthKey;
   day?: number;
+  availableMonths?: string[];
   onChange: (month: MonthKey, day?: number) => void;
 };
 
-export function PeriodPicker({ month, day, onChange }: PeriodPickerProps) {
+export function PeriodPicker({
+  month,
+  day,
+  availableMonths,
+  onChange,
+}: PeriodPickerProps) {
   const [open, setOpen] = useState(false);
   const [viewYear, setViewYear] = useState(() => Number(month.slice(0, 4)));
+
+  // მხოლოდ ის თვეები, რომლებსაც აქვს ტრანზაქცია (+ მიმდინარე არჩეული).
+  const available = new Set(
+    availableMonths && availableMonths.length > 0 ? availableMonths : [month],
+  );
 
   useEffect(() => {
     if (open) setViewYear(Number(month.slice(0, 4)));
@@ -76,20 +87,20 @@ export function PeriodPicker({ month, day, onChange }: PeriodPickerProps) {
         <div className="grid grid-cols-4 gap-1.5">
           {Array.from({ length: 12 }, (_, index) => {
             const monthKey = `${viewYear}-${String(index + 1).padStart(2, "0")}`;
-            const isFuture = monthKey > CURRENT_MONTH_KEY;
+            const isSelectable = available.has(monthKey);
             const isSelected = monthKey === month;
             return (
               <button
                 key={monthKey}
-                disabled={isFuture}
+                disabled={!isSelectable}
                 onClick={() => onChange(monthKey, undefined)}
                 className={cn(
                   "rounded-md py-1.5 text-sm font-medium transition-colors",
                   isSelected
                     ? "bg-primary text-primary-foreground"
-                    : isFuture
-                      ? "cursor-not-allowed text-muted-foreground/40"
-                      : "hover:bg-muted",
+                    : isSelectable
+                      ? "hover:bg-muted"
+                      : "cursor-not-allowed text-muted-foreground/40",
                 )}
               >
                 {GEORGIAN_MONTHS_SHORT[index]}
