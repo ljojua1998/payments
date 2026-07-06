@@ -222,7 +222,7 @@ function PasswordCard() {
         {changePassword.isError && (
           <AuthError message={changePassword.error.message} />
         )}
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid gap-4 sm:max-w-sm">
           <FormField
             id="new-password"
             label="ახალი პაროლი"
