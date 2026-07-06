@@ -58,9 +58,22 @@ export async function UserMenu({ compact = false }: { compact?: boolean }) {
 
   if (compact) {
     return (
-      <div className="flex items-center gap-2">
-        <Link href="/settings" aria-label="პარამეტრები">
-          <Avatar name={fullName} avatarUrl={profile?.avatar_url ?? null} size={30} />
+      <div className="flex items-center gap-1">
+        <Link
+          href="/settings"
+          aria-label="პარამეტრები"
+          className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+        >
+          {profile?.avatar_url ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={profile.avatar_url}
+              alt=""
+              className="h-6 w-6 rounded-full object-cover"
+            />
+          ) : (
+            <Settings size={16} />
+          )}
         </Link>
         <ThemeSwitcher />
         <LogoutButton />
