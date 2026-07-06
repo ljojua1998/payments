@@ -225,3 +225,7 @@ supabase/
 - **RLS** — მონაცემები მხოლოდ ავტორიზებულისთვის; RPC-ები `anon`-ისთვის დახურულია;
   დოკუმენტები/ავატარები/პროფილები owner-only
 - **AI კონტექსტი ცოცხალია** — ასისტენტი ყოველ კითხვაზე ბაზიდან კითხულობს, არაფერს იგონებს
+- **Security headers** — HSTS, CSP, X-Frame-Options, X-Content-Type-Options,
+  Referrer-Policy და Permissions-Policy ყველა პასუხზე (`next.config.ts`)
+- **პაროლის დაცვა** — leaked-password protection Supabase-ის Pro გეგმის ფუნქციაა;
+  free tier-ზე პაროლის ვალიდაცია აპლიკაციის დონეზე ხდება (Zod), OTP-ს ვადა 3600 წმ
