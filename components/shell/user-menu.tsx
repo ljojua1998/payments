@@ -1,7 +1,15 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Settings } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/server";
+import { buttonVariants } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { LogoutButton } from "@/components/logout-button";
 import { ThemeSwitcher } from "@/components/theme-switcher";
 
@@ -58,26 +66,36 @@ export async function UserMenu({ compact = false }: { compact?: boolean }) {
 
   if (compact) {
     return (
-      <div className="flex items-center gap-1">
-        <Link
-          href="/settings"
-          aria-label="პარამეტრები"
-          className="flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-        >
-          {profile?.avatar_url ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={profile.avatar_url}
-              alt=""
-              className="h-6 w-6 rounded-full object-cover"
-            />
-          ) : (
-            <Settings size={16} />
-          )}
-        </Link>
-        <ThemeSwitcher />
-        <LogoutButton />
-      </div>
+      <TooltipProvider delayDuration={200}>
+        <div className="flex items-center gap-1">
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Link
+                href="/settings"
+                aria-label="პარამეტრები"
+                className={cn(
+                  buttonVariants({ variant: "ghost", size: "sm" }),
+                  "text-muted-foreground",
+                )}
+              >
+                {profile?.avatar_url ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={profile.avatar_url}
+                    alt=""
+                    className="h-5 w-5 rounded-full object-cover"
+                  />
+                ) : (
+                  <Settings size={16} />
+                )}
+              </Link>
+            </TooltipTrigger>
+            <TooltipContent>პარამეტრები</TooltipContent>
+          </Tooltip>
+          <ThemeSwitcher />
+          <LogoutButton />
+        </div>
+      </TooltipProvider>
     );
   }
 
